@@ -9,6 +9,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from './decorator';
 
+// =================== USED FOR AUTHENTICATED REQUEST ==================== //
 @Injectable()
 export class JwtAuth implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,6 +29,7 @@ export class JwtAuth implements CanActivate {
   }
 }
 
+// ========== FOR GRANTING PERMISSION TO USER WITH SPECIFIC ROLE ============ //
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
