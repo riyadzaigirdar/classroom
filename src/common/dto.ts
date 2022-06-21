@@ -12,4 +12,8 @@ export class ReqUserTokenPayload {
   @IsString()
   @IsNotEmpty()
   fullName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  role: string;
 }
