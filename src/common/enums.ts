@@ -4,11 +4,13 @@ export enum USERROLE_TYPE {
   STUDENT = 'student',
 }
 
+// ============= USED FOR IDENTIFYING BOTH POST AND SUBMISSION ========== //
 export enum POST_TYPE {
   ASSIGNMENT = 'assignment',
   EXAM = 'exam',
 }
 
+// ============= USED FOR IDENTIFYING SUBMISSION STATUS ============= //
 export enum SUBMISSION_STATUS_TYPE {
   PENDING = 'pending',
   SUBMITTED = 'submitted',
