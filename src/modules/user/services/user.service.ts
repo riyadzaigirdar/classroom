@@ -1,12 +1,17 @@
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { User } from '../entities/user.entity';
 import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
 import { RedisCacheService } from './redis.service';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -50,7 +55,7 @@ export class UserService {
       where: { email: body.email },
     });
 
-    if (!found) throw new BadRequestException('User with that email not found');
+    if (!found) throw new NotFoundException('User with that email not found');
 
     if (!(await this.checkPasswordMatch(found.password, body.password)))
       throw new BadRequestException("Password didn't math");
@@ -68,11 +73,17 @@ export class UserService {
   }
 
   async validateToken(req: any): Promise<ReqUserTokenPayload> {
+    let tokenInRedis = await this.redisCacheService.get(
+      req.headers.authorization,
+    );
+
+    if (!tokenInRedis) throw new BadRequestException('Session expired');
+
     let found: User = await this.userRepository.findOne({
       where: { id: req.user.id },
     });
 
-    if (!found) throw new BadRequestException('User not found');
+    if (!found) throw new NotFoundException('User not found');
 
     return {
       id: found.id,
