@@ -1,47 +1,35 @@
-import * as jwt from 'jsonwebtoken';
-import {
-  BadRequestException,
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from './decorator';
+import { UserService } from '../modules/user/services/user.service';
 
-// ===================== USED FOR AUTHENTICATED REQUEST ==================== //
 @Injectable()
-export class JwtAuth implements CanActivate {
+export class AuthorizeGuard implements CanActivate {
+  constructor(private reflector: Reflector, private userService: UserService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest<any>();
+    const permission: {
+      module: string;
+      roles: string[];
+      allowAnonymous?: boolean;
+    } = this.reflector.getAllAndOverride(PERMISSION_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
-    const token: string = req.headers['authorization'];
-
-    if (!token) throw new UnauthorizedException('Unauthorized');
-
-    try {
-      var decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-      throw new BadRequestException('Token invalid');
+    if (!permission) {
+      return false;
     }
-    req['user'] = decoded;
-    return true;
-  }
-}
 
-// ========== FOR GRANTING PERMISSION TO USER WITH SPECIFIC ROLE =========== //
-@Injectable()
-export class PermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+    // First check if anonymous (public access) is allowed.
+    if (permission.allowAnonymous !== undefined && permission.allowAnonymous) {
+      return true;
+    }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<any>();
-    const permission: { module: string; roles: string[] } =
-      this.reflector.getAllAndOverride(PERMISSION_KEY, [
-        context.getHandler(),
-        context.getClass(),
-      ]);
-    if (!permission) return false;
-    return permission.roles.some((role) => request.user?.role === role);
+    // Validate user
+    await this.userService.validateToken(req);
+
+    // Check role permission
+    return permission.roles.some((role) => req.user?.role === role);
   }
 }

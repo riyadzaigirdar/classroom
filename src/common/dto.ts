@@ -1,9 +1,15 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
+export class ResponseDto {
+  code: number;
+  success: boolean;
+  message: string;
+  data: object;
+}
 export class ReqUserTokenPayload {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  userId: string;
+  id: number;
 
   @IsString()
   @IsNotEmpty()
