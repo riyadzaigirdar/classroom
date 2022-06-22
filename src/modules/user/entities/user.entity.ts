@@ -1,6 +1,7 @@
 import { USERROLE_TYPE } from 'src/common/enums';
 import { Column, Entity } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
+import { ulid } from 'ulid';
 
 @Entity('user')
 export class User extends AbstractRepository {
@@ -15,6 +16,9 @@ export class User extends AbstractRepository {
 
   @Column({ type: 'boolean', default: false })
   emailVerified: boolean;
+
+  @Column({ type: 'varchar', default: ulid(), nullable: true })
+  emailVerifyCode: string;
 
   @Column({
     type: 'enum',

@@ -23,3 +23,8 @@ export class ReqUserTokenPayload {
   @IsNotEmpty()
   role: string;
 }
+
+export class ServiceResponseDto {
+  message: string;
+  data: object;
+}

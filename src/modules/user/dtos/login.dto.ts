@@ -14,8 +14,3 @@ export class LoginServiceData {
   accessToken: string;
   refreshToken: string;
 }
-
-export class LoginServiceResponse {
-  message: string;
-  data: LoginServiceData;
-}
