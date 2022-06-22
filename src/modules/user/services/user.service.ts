@@ -6,11 +6,13 @@ import { Repository } from 'typeorm';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { User } from '../entities/user.entity';
 import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
+import { RedisCacheService } from './redis.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   async hashPassword(password): Promise<String> {
@@ -26,7 +28,7 @@ export class UserService {
   }
 
   private async genetateToken(user: User, time: number): Promise<string> {
-    return await jwt.sign(
+    let token: string = await jwt.sign(
       {
         id: user.id,
         fullName: user.fullName,
@@ -39,6 +41,8 @@ export class UserService {
         algorithm: 'HS256',
       },
     );
+    await this.redisCacheService.set(token, user.id, time);
+    return token;
   }
 
   async login(body: LoginRequestBodyDto): Promise<ServiceResponseDto> {
@@ -50,6 +54,9 @@ export class UserService {
 
     if (!(await this.checkPasswordMatch(found.password, body.password)))
       throw new BadRequestException("Password didn't math");
+
+    found.lastLogin = new Date().toISOString();
+    await this.userRepository.save(found);
 
     return {
       data: {
@@ -75,17 +82,17 @@ export class UserService {
     };
   }
 
-  async validateEmail(emailVerifyCode: string): Promise<ServiceResponseDto> {
+  async verifyEmail(emailVerifyCode: string): Promise<ServiceResponseDto> {
     let found: User = await this.userRepository.findOne({
       where: { emailVerifyCode },
     });
 
-    if (found) throw new BadRequestException('Invalid code');
+    if (!found) throw new BadRequestException('Invalid code');
 
     found.emailVerified = true;
     found.emailVerifyCode = null;
 
-    let saved = await this.userRepository.save(found);
+    let saved: User = await this.userRepository.save(found);
 
     return {
       data: {

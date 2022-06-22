@@ -20,6 +20,9 @@ export class User extends AbstractRepository {
   @Column({ type: 'varchar', default: ulid(), nullable: true })
   emailVerifyCode: string;
 
+  @Column({ type: 'varchar', default: null, nullable: true })
+  lastLogin: string;
+
   @Column({
     type: 'enum',
     enum: USERROLE_TYPE,

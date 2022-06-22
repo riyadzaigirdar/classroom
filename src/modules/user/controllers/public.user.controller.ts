@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ResponseDto, ServiceResponseDto } from 'src/common/dto';
 import { LoginRequestBodyDto } from '../dtos/login.dto';
 import { UserService } from '../services/user.service';
@@ -12,6 +12,20 @@ export class PublicUserController {
     let { message, data }: ServiceResponseDto = await this.userService.login(
       body,
     );
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Get('user/:emailVerifyCode/verify-email')
+  async verifyEmail(
+    @Param('emailVerifyCode') emailVerifyCode: string,
+  ): Promise<ResponseDto> {
+    let { message, data }: ServiceResponseDto =
+      await this.userService.verifyEmail(emailVerifyCode);
     return {
       code: 200,
       success: true,

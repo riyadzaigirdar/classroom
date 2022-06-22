@@ -27,6 +27,7 @@ import { ClassroomModule } from './modules/classroom/classroom.module';
         };
       },
     }),
+
     UserModule,
     ClassroomModule,
     EmailModule,
