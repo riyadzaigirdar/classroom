@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
 import { Submission } from '../entities/submission.entity';
+import { CreateClassRoom } from '../dtos/createClassroom.dto';
 
 @Injectable()
 export class ClassRoomService {
@@ -15,6 +16,8 @@ export class ClassRoomService {
     @InjectRepository(Submission)
     private submissionRepository: Repository<Submission>,
   ) {}
+
+  async createClassRoom(body: CreateClassRoom) {}
 
   // ================== GENERATE INVITE CODE(UUID) ========================== //
   private generateRandomInviteCode = () => uuidv4();

@@ -4,6 +4,7 @@ import { AbstractRepository } from '../../../common/abstract-repository';
 import { ulid } from 'ulid';
 import { Submission } from 'src/modules/classroom/entities/submission.entity';
 import { Post } from 'src/modules/classroom/entities/post.entity';
+import { ClassRoom } from 'src/modules/classroom/entities/classroom.entity';
 
 @Entity('user')
 export class User extends AbstractRepository {
@@ -39,4 +40,10 @@ export class User extends AbstractRepository {
 
   @OneToMany((type) => Post, (post) => post.createdBy)
   posts: Post[];
+
+  @OneToMany((type) => ClassRoom, (classRoom) => classRoom.createdBy)
+  classroomsCreated: ClassRoom[];
+
+  @OneToMany((type) => ClassRoom, (classRoom) => classRoom.teacher)
+  classrooms: ClassRoom[];
 }
