@@ -1,6 +1,12 @@
-import { IsDefined, IsString } from 'class-validator';
+import {
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
-export class CreateClassRoom {
+export class CreateClassRoomDto {
   @IsDefined()
   @IsString()
   className: string;
@@ -8,4 +14,8 @@ export class CreateClassRoom {
   @IsDefined()
   @IsString()
   subjectName: string;
+
+  @IsOptional()
+  @IsNumber()
+  teacherId: number;
 }

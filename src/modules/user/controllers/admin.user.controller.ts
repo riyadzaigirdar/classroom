@@ -40,16 +40,10 @@ export class AdminUserController {
 
   @Get('/')
   @HttpCode(200)
-  async listUser(
-    @Query('role', new DefaultValuePipe(''))
-    role: USERROLE_TYPE,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('count', new DefaultValuePipe(10), ParseIntPipe) count: number,
-  ): Promise<ResponseDto> {
+  async listUser(@Query() query: ListUserQueryDto): Promise<ResponseDto> {
+    console.log(query);
     let { data, message }: ServiceResponseDto = await this.userService.listUser(
-      role,
-      page,
-      count,
+      query,
     );
 
     return {

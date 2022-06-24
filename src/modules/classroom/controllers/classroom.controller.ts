@@ -17,7 +17,7 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { AuthorizeGuard } from 'src/common/guard';
-import { CreateClassRoom } from '../dtos/create-classroom.dto';
+import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
 import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { ClassRoomService } from '../services/classroom.service';
 
@@ -30,7 +30,7 @@ export class ClassRoomController {
   @Permissions('classroom', ['teacher'])
   async createClassRoom(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
-    @Body() body: CreateClassRoom,
+    @Body() body: CreateClassRoomDto,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
       await this.classRoomService.createClassRoom(reqUser, body);

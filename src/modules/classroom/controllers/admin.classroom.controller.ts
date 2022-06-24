@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { ReqUser } from 'src/common/decorator/param.decortor';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 
 import { AuthorizeGuard } from '../../../common/guard';
+import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
 import { ClassRoomService } from '../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
@@ -28,6 +31,22 @@ export class AdminClassRoomController {
   ) {
     let { data, message }: ServiceResponseDto =
       await this.classRoomService.listClassRoom(reqUser, page, count);
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Post('')
+  async createClassRoom(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Body() body: CreateClassRoomDto,
+  ) {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.createClassRoom(reqUser, body);
 
     return {
       code: 200,

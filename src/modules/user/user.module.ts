@@ -8,7 +8,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { UserController } from './controllers/user.controller';
 import { RedisCacheService } from './services/redis.service';
 
-import { AdminUserController } from './controllers/admin.controller';
+import { AdminUserController } from './controllers/admin.user.controller';
 import { PublicUserController } from './controllers/public.user.controller';
 import { EmailService } from '../email/services/email.service';
 import { StudentMeta } from './entities/student_meta';

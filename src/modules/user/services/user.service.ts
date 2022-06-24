@@ -136,21 +136,11 @@ export class UserService {
     };
   }
 
-  async listUser(
-    role: USERROLE_TYPE,
-    page: number,
-    count: number,
-  ): Promise<ServiceResponseDto> {
+  async listUser(query: ListUserQueryDto): Promise<ServiceResponseDto> {
     let baseQuery = this.userRepository.createQueryBuilder('user');
 
-    if (role && !Object.values(USERROLE_TYPE).includes(role)) {
-      throw new BadRequestException(
-        "Role type doesn't match any of admin, student teacher",
-      );
-    }
-
-    if (role) {
-      baseQuery.where('user.role = :role', { role });
+    if (query.role) {
+      baseQuery.where('user.role = :role', { role: query.role });
     }
 
     let total = await baseQuery.getCount();
@@ -165,8 +155,8 @@ export class UserService {
         'user.emailVerified as "userEmailVerified"',
         'user.emailVerifyCode as "userEmailVerifyCode"',
       ])
-      .limit(count)
-      .offset((page - 1) * count)
+      .limit(query.count)
+      .offset((query.page - 1) * query.count)
       .orderBy('user.createdAt', 'DESC')
       .getRawMany();
 
@@ -230,6 +220,9 @@ export class UserService {
     };
   }
 
+  async getUser(body: Partial<User>) {
+    return await this.userRepository.findOne(body);
+  }
   private async hashPassword(password): Promise<string> {
     const hash: string = await bcrypt.hash(password, 10);
     return hash;

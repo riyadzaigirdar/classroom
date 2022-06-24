@@ -1,6 +1,5 @@
-import { DefaultValuePipe } from '@nestjs/common';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsDefined, IsEnum, IsNumber, IsOptional } from 'class-validator';
 import { USERROLE_TYPE } from 'src/common/enums';
 
 export class ListUserQueryDto {
@@ -10,15 +9,9 @@ export class ListUserQueryDto {
   })
   role: USERROLE_TYPE;
 
-  @IsNumber()
-  @Transform(({ value }) => {
-    return value ? value : 1;
-  })
-  page: number;
+  @IsOptional()
+  page: number = 1;
 
-  @IsNumber()
-  @Transform(({ value }) => {
-    return value ? value : 10;
-  })
-  count: number;
+  @IsOptional()
+  count: number = 10;
 }

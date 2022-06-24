@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, getManager, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
-import { CreateClassRoom } from '../dtos/create-classroom.dto';
+import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { EnrollStudentDto } from '../dtos/enroll-student.dto';
@@ -29,7 +29,7 @@ export class ClassRoomService {
   EnrolledStudent;
   async createClassRoom(
     reqUser: ReqUserTokenPayloadDto,
-    body: CreateClassRoom,
+    body: CreateClassRoomDto,
   ): Promise<ServiceResponseDto> {
     if (
       await this.classRoomRepository.findOne({
@@ -40,11 +40,28 @@ export class ClassRoomService {
         'Classroom with that class name or subject name already exists',
       );
 
+    if (reqUser.role === USERROLE_TYPE.ADMIN && !body.teacherId) {
+      throw new BadRequestException('Must provide teacher id in request body');
+    }
+
+    if (
+      body.teacherId &&
+      !(await this.userService.getUser({
+        id: body.teacherId,
+        role: USERROLE_TYPE.TEACHER,
+      }))
+    ) {
+      throw new NotFoundException('Teacher with that id not found');
+    }
+
+    let teacherId =
+      reqUser.role === USERROLE_TYPE.ADMIN ? body.teacherId : reqUser.id;
+
     let newClassRoom = await this.classRoomRepository.save(
       await this.classRoomRepository.create({
         ...body,
         createdById: reqUser.id,
-        teacherId: reqUser.id,
+        teacherId,
       }),
     );
     return {
