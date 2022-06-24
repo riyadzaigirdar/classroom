@@ -23,6 +23,6 @@ import { EmailService } from '../email/services/email.service';
   ],
   controllers: [AdminUserController, PublicUserController, UserController],
   providers: [UserService, RedisCacheService, EmailService],
-  exports: [TypeOrmModule.forFeature([User])],
+  exports: [UserService],
 })
 export class UserModule {}
