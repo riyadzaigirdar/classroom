@@ -202,7 +202,7 @@ export class ClassRoomService {
         'Teacher not permitted to update this classroom',
       );
 
-    Object.keys((item) => {
+    Object.keys(body).map((item) => {
       foundClassRoom[item] = body[item];
     });
 
