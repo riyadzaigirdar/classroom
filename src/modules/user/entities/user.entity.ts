@@ -1,10 +1,12 @@
 import { USERROLE_TYPE } from 'src/common/enums';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
 import { ulid } from 'ulid';
 import { Submission } from 'src/modules/classroom/entities/submission.entity';
 import { Post } from 'src/modules/classroom/entities/post.entity';
 import { ClassRoom } from 'src/modules/classroom/entities/classroom.entity';
+import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled-students.entity';
+import { StudentMeta } from './student-meta';
 
 @Entity('user')
 export class User extends AbstractRepository {
@@ -46,4 +48,13 @@ export class User extends AbstractRepository {
 
   @OneToMany((type) => ClassRoom, (classRoom) => classRoom.teacher)
   classrooms: ClassRoom[];
+
+  @OneToMany(
+    (type) => EnrolledStudent,
+    (enrolledStudent) => enrolledStudent.student,
+  )
+  enrolledClasses: ClassRoom[];
+
+  @OneToOne((type) => StudentMeta, (studentMeta) => studentMeta.user)
+  studentMeta: StudentMeta;
 }

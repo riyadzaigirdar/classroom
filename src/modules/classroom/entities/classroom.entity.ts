@@ -1,10 +1,10 @@
 import { ulid } from 'ulid';
-import { CLASSROOM_STATUS_TYPE } from 'src/common/enums';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-
-import { AbstractRepository } from '../../../common/abstract-repository';
 import { Post } from './post.entity';
+import { CLASSROOM_STATUS_TYPE } from 'src/common/enums';
 import { User } from 'src/modules/user/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { AbstractRepository } from '../../../common/abstract-repository';
+import { EnrolledStudent } from './enrolled-students.entity';
 
 @Entity('class_room')
 export class ClassRoom extends AbstractRepository {
@@ -49,4 +49,10 @@ export class ClassRoom extends AbstractRepository {
   })
   @JoinColumn({ name: 'createdById' })
   createdBy: User[];
+
+  @OneToMany(
+    (type) => EnrolledStudent,
+    (enrolledStudent) => enrolledStudent.classRoom,
+  )
+  enrolled_students: EnrolledStudent[];
 }

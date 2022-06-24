@@ -10,13 +10,19 @@ import { ClassRoomController } from './controllers/classroom.controller';
 import { PostController } from './controllers/post.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { UserModule } from '../user/user.module';
-
+import { AdminClassRoomController } from './controllers/admin.classroom.controller';
+import { EnrolledStudent } from './entities/enrolled-students.entity';
 @Module({
   imports: [
     UserModule,
-    TypeOrmModule.forFeature([ClassRoom, Post, Submission]),
+    TypeOrmModule.forFeature([ClassRoom, Post, Submission, EnrolledStudent]),
   ],
-  controllers: [ClassRoomController, PostController, SubmissionController],
+  controllers: [
+    AdminClassRoomController,
+    ClassRoomController,
+    PostController,
+    SubmissionController,
+  ],
   providers: [ClassRoomService, PostService, SubmissionService],
 })
 export class ClassroomModule {}
