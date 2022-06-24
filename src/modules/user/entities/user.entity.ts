@@ -1,7 +1,8 @@
 import { USERROLE_TYPE } from 'src/common/enums';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
 import { ulid } from 'ulid';
+import { Submission } from 'src/modules/classroom/entities/submission.entity';
 
 @Entity('user')
 export class User extends AbstractRepository {
@@ -20,7 +21,7 @@ export class User extends AbstractRepository {
   @Column({ type: 'varchar', default: ulid(), nullable: true })
   emailVerifyCode: string;
 
-  @Column({ type: 'varchar', default: null, nullable: true })
+  @Column({ type: 'timestamp', default: null, nullable: true })
   lastLogin: string;
 
   @Column({
@@ -30,4 +31,8 @@ export class User extends AbstractRepository {
     nullable: false,
   })
   role: string;
+
+  // ======================= VIRTUAL COLUMN ===================== //
+  @OneToMany((type) => Submission, (submission) => submission.assigned)
+  submissions: Submission[];
 }

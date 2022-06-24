@@ -23,7 +23,7 @@ export enum SUBMISSION_STATUS_TYPE {
   EXPIRED = 'expired',
 }
 
-export enum CLASSROOM_TYPE {
+export enum CLASSROOM_STATUS_TYPE {
   ONGOING = 'ongoing',
   ENDED = 'ended',
 }

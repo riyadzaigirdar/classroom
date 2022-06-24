@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -167,7 +167,4 @@ export class UserService {
       Math.random() * (Math.floor(999999) - Math.ceil(100000) + 1) +
         Math.ceil(100000),
     ).toString();
-
-  // ================== GENERATE INVITE CODE(UUID) ========================== //
-  private generateRandomInviteCode = () => uuidv4();
 }
