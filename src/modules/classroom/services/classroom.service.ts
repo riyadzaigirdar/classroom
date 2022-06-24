@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, getManager, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
@@ -103,7 +108,7 @@ export class ClassRoomService {
       where: { inviteCode: classInviteCode },
     });
 
-    if (!foundClassRoom) throw new BadRequestException('Invalid invite code');
+    if (!foundClassRoom) throw new NotFoundException('Invalid invite code');
 
     let student: User;
     let enrolledStudent: EnrolledStudent;
@@ -131,10 +136,14 @@ export class ClassRoomService {
         );
       });
     } catch (error) {
+      if (error instanceof BadRequestException)
+        throw new BadRequestException(error['message']);
+
+      if (error instanceof ForbiddenException)
+        throw new ForbiddenException(error['message']);
+
       throw new BadRequestException(
-        error instanceof BadRequestException
-          ? error['message']
-          : 'Something went wrong! Please try again later',
+        'Something went wrong! Please try again later',
       );
     }
 
@@ -160,14 +169,14 @@ export class ClassRoomService {
     });
 
     if (!foundClassRoom) {
-      throw new BadRequestException('Class room with that id not found');
+      throw new NotFoundException('Class room with that id not found');
     }
 
     if (
       reqUser.role === USERROLE_TYPE.TEACHER &&
       foundClassRoom.teacherId !== reqUser.id
     ) {
-      throw new BadRequestException(
+      throw new ForbiddenException(
         'Teacher is not permitted to access this information',
       );
     }

@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -72,7 +73,7 @@ export class UserService {
     });
 
     if (found && found.role !== USERROLE_TYPE.STUDENT) {
-      throw new BadRequestException('Only student account allowed to enroll');
+      throw new ForbiddenException('Only student account allowed to enroll');
     }
 
     if (found && !this.checkPasswordMatch(found.password, body.password)) {
