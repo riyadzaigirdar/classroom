@@ -4,6 +4,11 @@ export enum USERROLE_TYPE {
   STUDENT = 'student',
 }
 
+export enum CREATE_USERROLE_TYPE {
+  TEACHER = 'teacher',
+  STUDENT = 'student',
+}
+
 // ============= USED FOR IDENTIFYING BOTH POST AND SUBMISSION ========== //
 export enum POST_TYPE {
   ASSIGNMENT = 'assignment',

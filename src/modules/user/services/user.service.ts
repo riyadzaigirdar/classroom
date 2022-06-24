@@ -4,23 +4,134 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
-import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { User } from '../entities/user.entity';
-import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
+import { InjectRepository } from '@nestjs/typeorm';
 import { RedisCacheService } from './redis.service';
-import { NotFoundError } from 'rxjs';
+import { CreateTeacherDto } from '../dtos/createTeacher.dto';
+import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
+import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
+import { USERROLE_TYPE } from 'src/common/enums';
+import { EmailService } from 'src/modules/email/services/email.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly emailService: EmailService,
     private readonly redisCacheService: RedisCacheService,
   ) {}
 
-  async hashPassword(password): Promise<String> {
+  async createTeacher(body: CreateTeacherDto): Promise<ServiceResponseDto> {
+    if (await this.userRepository.findOne({ where: { email: body.email } }))
+      throw new BadRequestException('User with that email already exists');
+
+    let password: string = this.generateRandomPassword();
+    let hashedPassword: string = await this.hashPassword(password);
+
+    let teacherSaved: User = await this.userRepository.save(
+      await this.userRepository.create({
+        ...body,
+        role: USERROLE_TYPE.TEACHER,
+        password: hashedPassword,
+      }),
+    );
+
+    // ======================= SEND PASSWORD TO EMAIL ============================ //
+    this.emailService.sendPasswordToEmail(teacherSaved.email, password);
+    // ======================= SEND VERIFY CODE TO EMAIL ========================= //
+    this.emailService.sendEmailVerifyCode(
+      teacherSaved.email,
+      teacherSaved.emailVerifyCode,
+    );
+
+    return {
+      data: {
+        id: teacherSaved.id,
+        fullName: teacherSaved.fullName,
+        email: teacherSaved.email,
+      },
+      message: 'Successfully added teacher',
+    };
+  }
+
+  async login(body: LoginRequestBodyDto): Promise<ServiceResponseDto> {
+    let found: User = await this.userRepository.findOne({
+      where: { email: body.email },
+    });
+
+    if (!found) throw new NotFoundException('User with that email not found');
+
+    if (!(await this.checkPasswordMatch(found.password, body.password)))
+      throw new BadRequestException("Password didn't math");
+
+    found.lastLogin = new Date().toISOString();
+    await this.userRepository.save(found);
+
+    return {
+      data: {
+        accessToken: await this.genetateToken(found, 60 * 60 * 24 * 7), // 7 days
+        refreshToken: await this.genetateToken(found, 60 * 60 * 24 * 21), // 21 days
+      } as LoginServiceData,
+      message: 'Successfully logged in',
+    };
+  }
+
+  async validateToken(req: any): Promise<ReqUserTokenPayload> {
+    let decodedUser;
+    try {
+      decodedUser = jwt.verify(
+        req.headers.authorization,
+        process.env.JWT_SECRET,
+      );
+    } catch (error) {
+      throw new UnauthorizedException('Token invalid');
+    }
+
+    let found: User = await this.userRepository.findOne({
+      where: { id: decodedUser.id },
+    });
+
+    if (!found) throw new NotFoundException('User not found');
+
+    return {
+      id: found.id,
+      fullName: found.fullName,
+      email: found.email,
+      role: found.role,
+    };
+  }
+
+  async verifyEmail(emailVerifyCode: string): Promise<ServiceResponseDto> {
+    let found: User = await this.userRepository.findOne({
+      where: { emailVerifyCode },
+    });
+
+    if (!found) throw new NotFoundException('Invalid email verify code');
+
+    if (found.emailVerified)
+      throw new BadRequestException('Your email is already verified');
+
+    found.emailVerified = true;
+    found.emailVerifyCode = null;
+
+    let saved: User = await this.userRepository.save(found);
+
+    return {
+      data: {
+        id: saved.id,
+        fullName: saved.fullName,
+        emailVerifyCode: saved.emailVerifyCode,
+        emailVerified: saved.emailVerified,
+      },
+      message: 'Successfully verified email',
+    };
+  }
+
+  private async hashPassword(password): Promise<string> {
     const hash: string = await bcrypt.hash(password, 10);
     return hash;
   }
@@ -50,69 +161,13 @@ export class UserService {
     return token;
   }
 
-  async login(body: LoginRequestBodyDto): Promise<ServiceResponseDto> {
-    let found: User = await this.userRepository.findOne({
-      where: { email: body.email },
-    });
+  // ================== GENERATE RANDOM PASSWORD(6 CHARACTER) ================ //
+  private generateRandomPassword = (): string =>
+    Math.floor(
+      Math.random() * (Math.floor(999999) - Math.ceil(100000) + 1) +
+        Math.ceil(100000),
+    ).toString();
 
-    if (!found) throw new NotFoundException('User with that email not found');
-
-    if (!(await this.checkPasswordMatch(found.password, body.password)))
-      throw new BadRequestException("Password didn't math");
-
-    found.lastLogin = new Date().toISOString();
-    await this.userRepository.save(found);
-
-    return {
-      data: {
-        accessToken: await this.genetateToken(found, 60 * 60 * 24 * 7), // 7 days
-        refreshToken: await this.genetateToken(found, 60 * 60 * 24 * 21), // 21 days
-      } as LoginServiceData,
-      message: 'Successfully logged in',
-    };
-  }
-
-  async validateToken(req: any): Promise<ReqUserTokenPayload> {
-    let tokenInRedis = await this.redisCacheService.get(
-      req.headers.authorization,
-    );
-
-    if (!tokenInRedis) throw new BadRequestException('Session expired');
-
-    let found: User = await this.userRepository.findOne({
-      where: { id: req.user.id },
-    });
-
-    if (!found) throw new NotFoundException('User not found');
-
-    return {
-      id: found.id,
-      fullName: found.fullName,
-      email: found.email,
-      role: found.role,
-    };
-  }
-
-  async verifyEmail(emailVerifyCode: string): Promise<ServiceResponseDto> {
-    let found: User = await this.userRepository.findOne({
-      where: { emailVerifyCode },
-    });
-
-    if (!found) throw new BadRequestException('Invalid code');
-
-    found.emailVerified = true;
-    found.emailVerifyCode = null;
-
-    let saved: User = await this.userRepository.save(found);
-
-    return {
-      data: {
-        id: saved.id,
-        fullName: saved.fullName,
-        emailVerifyCode: saved.emailVerifyCode,
-        emailVerified: saved.emailVerified,
-      },
-      message: 'Successfully verified email',
-    };
-  }
+  // ================== GENERATE INVITE CODE(UUID) ========================== //
+  private generateRandomInviteCode = () => uuidv4();
 }

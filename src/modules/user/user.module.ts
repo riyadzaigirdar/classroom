@@ -2,10 +2,15 @@ import configuration from '../../config';
 import { CacheModule, Module } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EmailModule } from '../email/email.module';
 import { UserService } from './services/user.service';
 import * as redisStore from 'cache-manager-redis-store';
 import { UserController } from './controllers/user.controller';
 import { RedisCacheService } from './services/redis.service';
+
+import { AdminUserController } from './controllers/admin.controller';
+import { PublicUserController } from './controllers/public.user.controller';
+import { EmailService } from '../email/services/email.service';
 
 @Module({
   imports: [
@@ -14,8 +19,9 @@ import { RedisCacheService } from './services/redis.service';
       store: redisStore,
       ...configuration().redis,
     }),
+    EmailModule,
   ],
-  controllers: [UserController],
-  providers: [UserService, RedisCacheService],
+  controllers: [AdminUserController, PublicUserController, UserController],
+  providers: [UserService, RedisCacheService, EmailService],
 })
 export class UserModule {}

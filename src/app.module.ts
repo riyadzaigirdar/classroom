@@ -8,6 +8,8 @@ import { CronModule } from './modules/cron/cron.module';
 import { EmailModule } from './modules/email/email.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClassroomModule } from './modules/classroom/classroom.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionFilter } from './common/filter';
 
 @Module({
   imports: [
@@ -34,6 +36,12 @@ import { ClassroomModule } from './modules/classroom/classroom.module';
     CronModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

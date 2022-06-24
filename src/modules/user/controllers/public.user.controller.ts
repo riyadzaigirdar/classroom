@@ -1,13 +1,29 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { AllowAnonymous } from 'src/common/decorator/controller.decorator';
 import { ResponseDto, ServiceResponseDto } from 'src/common/dto';
+import { AuthorizeGuard } from 'src/common/guard';
 import { LoginRequestBodyDto } from '../dtos/login.dto';
 import { UserService } from '../services/user.service';
 
-@Controller('public')
+// ================== PUBLIC ROUTES (NO TOKEN NEEDED) =================== //
+
+@UseGuards(AuthorizeGuard)
+@AllowAnonymous('user')
+@Controller('public/user')
 export class PublicUserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('user/login')
+  @HttpCode(200)
+  @Post('login')
   async loginUser(@Body() body: LoginRequestBodyDto): Promise<ResponseDto> {
     let { message, data }: ServiceResponseDto = await this.userService.login(
       body,
@@ -20,7 +36,8 @@ export class PublicUserController {
     };
   }
 
-  @Get('user/:emailVerifyCode/verify-email')
+  @HttpCode(200)
+  @Put(':emailVerifyCode/verify-email')
   async verifyEmail(
     @Param('emailVerifyCode') emailVerifyCode: string,
   ): Promise<ResponseDto> {
