@@ -12,7 +12,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RedisCacheService } from './redis.service';
-import { CreateTeacherDto } from '../dtos/createTeacher.dto';
+import { CreateTeacherDto } from '../dtos/create-teacher.dto';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { USERROLE_TYPE } from 'src/common/enums';
@@ -20,6 +20,7 @@ import { EmailService } from 'src/modules/email/services/email.service';
 import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled_students.entity';
 import { EnrollStudentDto } from 'src/modules/classroom/dtos/enroll-student.dto';
 import { StudentMeta } from '../entities/student_meta';
+import { ListUserQueryDto } from '../dtos/list-user-query.dto';
 
 @Injectable()
 export class UserService {
@@ -132,6 +133,49 @@ export class UserService {
         refreshToken: await this.genetateToken(found, 60 * 60 * 24 * 21), // 21 days
       } as LoginServiceData,
       message: 'Successfully logged in',
+    };
+  }
+
+  async listUser(
+    role: USERROLE_TYPE,
+    page: number,
+    count: number,
+  ): Promise<ServiceResponseDto> {
+    let baseQuery = this.userRepository.createQueryBuilder('user');
+
+    if (role && !Object.values(USERROLE_TYPE).includes(role)) {
+      throw new BadRequestException(
+        "Role type doesn't match any of admin, student teacher",
+      );
+    }
+
+    if (role) {
+      baseQuery.where('user.role = :role', { role });
+    }
+
+    let total = await baseQuery.getCount();
+
+    let foundList = await baseQuery
+      .select([
+        'user.id as "userId"',
+        'user.role as "userRole"',
+        'user.email as "userEmail"',
+        'user.fullName as "userFullName"',
+        'user.lastLogin as "userLastLogin"',
+        'user.emailVerified as "userEmailVerified"',
+        'user.emailVerifyCode as "userEmailVerifyCode"',
+      ])
+      .limit(count)
+      .offset((page - 1) * count)
+      .orderBy('user.createdAt', 'DESC')
+      .getRawMany();
+
+    return {
+      data: {
+        result: foundList,
+        total,
+      },
+      message: 'Successfully generated list of user',
     };
   }
 

@@ -1,5 +1,5 @@
 import { IsDefined, IsString, Min } from 'class-validator';
-import { CreateTeacherDto } from '../../user/dtos/createTeacher.dto';
+import { CreateTeacherDto } from '../../user/dtos/create-teacher.dto';
 
 export class EnrollStudentDto extends CreateTeacherDto {
   @IsDefined()

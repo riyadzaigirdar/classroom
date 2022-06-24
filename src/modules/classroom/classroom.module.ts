@@ -12,7 +12,7 @@ import { SubmissionController } from './controllers/submission.controller';
 import { UserModule } from '../user/user.module';
 import { AdminClassRoomController } from './controllers/admin.classroom.controller';
 import { EnrolledStudent } from './entities/enrolled_students.entity';
-import { PublicClassRoomController } from './controllers/public.classrool.controller';
+import { PublicClassRoomController } from './controllers/public.classroom.controller';
 @Module({
   imports: [
     UserModule,

@@ -67,6 +67,11 @@ export class ClassRoomService {
   ): Promise<ServiceResponseDto> {
     let baseQuery = this.classRoomRepository
       .createQueryBuilder('classroom')
+      .loadRelationCountAndMap(
+        'classroom.enrolledStudents',
+        'classroom.enrolled_students',
+        'enrolled',
+      )
       .leftJoinAndSelect('classroom.createdBy', 'createdBy')
       .leftJoinAndSelect('classroom.teacher', 'teacher');
 
@@ -83,12 +88,13 @@ export class ClassRoomService {
         'classroom.className as "className"',
         'classroom.subjectName as "subjectName"',
         'classroom.inviteCode as "inviteCode"',
-        'classroom.status as status',
-        'teacher.fullName as teacher',
-        'createdBy.fullName as createdBy',
+        'classroom.status as "classStatus"',
+        'teacher.fullName as "teacher"',
+        'createdBy.fullName as "createdBy"',
       ])
       .limit(count)
       .offset((page - 1) * count)
+      .orderBy('classroom.createdAt', 'DESC')
       .getRawMany();
 
     return {
@@ -200,6 +206,7 @@ export class ClassRoomService {
       ])
       .limit(count)
       .offset((page - 1) * count)
+      .orderBy('order.createdAt', 'DESC')
       .getRawMany();
 
     return {
