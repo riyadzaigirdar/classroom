@@ -3,6 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
 import { ulid } from 'ulid';
 import { Submission } from 'src/modules/classroom/entities/submission.entity';
+import { Post } from 'src/modules/classroom/entities/post.entity';
 
 @Entity('user')
 export class User extends AbstractRepository {
@@ -35,4 +36,7 @@ export class User extends AbstractRepository {
   // ======================= VIRTUAL COLUMN ===================== //
   @OneToMany((type) => Submission, (submission) => submission.assigned)
   submissions: Submission[];
+
+  @OneToMany((type) => Post, (post) => post.createdBy)
+  posts: Post[];
 }

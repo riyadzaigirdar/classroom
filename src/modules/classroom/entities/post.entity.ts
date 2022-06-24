@@ -1,4 +1,5 @@
 import { POST_TYPE } from 'src/common/enums';
+import { User } from 'src/modules/user/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
 import { ClassRoom } from './classroom.entity';
@@ -8,6 +9,9 @@ import { Submission } from './submission.entity';
 export class Post extends AbstractRepository {
   @Column({ type: 'int', nullable: false })
   classRoomId: number;
+
+  @Column({ type: 'int', nullable: false })
+  createdById: number;
 
   @Column({ type: 'float', nullable: false })
   totalMarks: number;
@@ -29,6 +33,14 @@ export class Post extends AbstractRepository {
   })
   @JoinColumn({ name: 'classRoomId' })
   classRoom: ClassRoom[];
+
+  @ManyToOne((type) => User, (user) => user.posts, {
+    nullable: true,
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  @JoinColumn({ name: 'createdById' })
+  createdBy: User[];
 
   @OneToMany((type) => Submission, (submission) => submission.post)
   submissions: Submission[];
