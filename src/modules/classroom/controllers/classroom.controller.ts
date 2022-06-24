@@ -12,7 +12,7 @@ import {
 import { Permissions } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
 import {
-  ReqUserTokenPayload,
+  ReqUserTokenPayloadDto,
   ResponseDto,
   ServiceResponseDto,
 } from 'src/common/dto';
@@ -29,7 +29,7 @@ export class ClassRoomController {
   @Post('/')
   @Permissions('classroom', ['teacher'])
   async createClassRoom(
-    @ReqUser() reqUser: ReqUserTokenPayload,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Body() body: CreateClassRoom,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
@@ -45,12 +45,36 @@ export class ClassRoomController {
   @Get('/')
   @Permissions('classroom', ['teacher'])
   async listClassRoom(
-    @ReqUser() reqUser: ReqUserTokenPayload,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('count', new DefaultValuePipe(10), ParseIntPipe) count: number,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
       await this.classRoomService.listClassRoom(reqUser, page, count);
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Get(':classRoomId/enrolled-students')
+  @Permissions('classroom', ['teacher'])
+  async listEnrolledStudentsOfClassRoom(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('classRoomId') classRoomId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('count', new DefaultValuePipe(10), ParseIntPipe) count: number,
+  ) {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.listEnrolledStudentsOfClassRoom(
+        reqUser,
+        classRoomId,
+        page,
+        count,
+      );
 
     return {
       code: 200,

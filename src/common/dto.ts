@@ -6,7 +6,7 @@ export class ResponseDto {
   message: string;
   data: object;
 }
-export class ReqUserTokenPayload {
+export class ReqUserTokenPayloadDto {
   @IsNumber()
   @IsNotEmpty()
   id: number;

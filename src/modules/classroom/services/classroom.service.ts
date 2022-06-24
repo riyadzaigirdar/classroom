@@ -4,7 +4,7 @@ import { getConnection, getManager, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
 import { CreateClassRoom } from '../dtos/create-classroom.dto';
-import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
+import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { UserService } from 'src/modules/user/services/user.service';
@@ -23,7 +23,7 @@ export class ClassRoomService {
   ) {}
   EnrolledStudent;
   async createClassRoom(
-    reqUser: ReqUserTokenPayload,
+    reqUser: ReqUserTokenPayloadDto,
     body: CreateClassRoom,
   ): Promise<ServiceResponseDto> {
     if (
@@ -56,7 +56,7 @@ export class ClassRoomService {
   }
 
   async listClassRoom(
-    reqUser: ReqUserTokenPayload,
+    reqUser: ReqUserTokenPayloadDto,
     page: number,
     count: number,
   ): Promise<ServiceResponseDto> {
@@ -146,6 +146,59 @@ export class ClassRoomService {
         enrolledClassId: foundClassRoom.id,
       },
       message: 'Successfully enrolled to class',
+    };
+  }
+
+  async listEnrolledStudentsOfClassRoom(
+    reqUser: ReqUserTokenPayloadDto,
+    classRoomId: number,
+    page: number,
+    count: number,
+  ): Promise<ServiceResponseDto> {
+    let foundClassRoom = await this.classRoomRepository.findOne({
+      where: { id: classRoomId },
+    });
+
+    if (!foundClassRoom) {
+      throw new BadRequestException('Class room with that id not found');
+    }
+
+    if (
+      reqUser.role === USERROLE_TYPE.TEACHER &&
+      foundClassRoom.teacherId !== reqUser.id
+    ) {
+      throw new BadRequestException(
+        'Teacher is not permitted to access this information',
+      );
+    }
+
+    let baseQuery = this.enrolledStudentRepository
+      .createQueryBuilder('enrolled')
+      .leftJoinAndSelect('enrolled.classRoom', 'classRoom')
+      .leftJoinAndSelect('enrolled.student', 'student')
+      .where('enrolled.classRoomId = :classRoomId', { classRoomId });
+
+    let total = await baseQuery.getCount();
+
+    let result = await baseQuery
+      .select([
+        'classRoom.id as "classRoomId"',
+        'classRoom.className as "className"',
+        'classRoom.subjectName as "subjectName"',
+        'student.id as "studentUserId"',
+        'student.fullName "studentFullName"',
+        'student.email "studentEmail"',
+      ])
+      .limit(count)
+      .offset((page - 1) * count)
+      .getRawMany();
+
+    return {
+      data: {
+        total,
+        result,
+      },
+      message: 'Successfully listed enrolled students of class',
     };
   }
 }

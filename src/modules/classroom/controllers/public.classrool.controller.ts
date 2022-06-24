@@ -2,7 +2,7 @@ import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AllowAnonymous } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
 import {
-  ReqUserTokenPayload,
+  ReqUserTokenPayloadDto,
   ResponseDto,
   ServiceResponseDto,
 } from 'src/common/dto';
@@ -19,7 +19,6 @@ export class PublicClassRoomController {
   @Post('/:classInviteCode/enroll')
   async enrollStudentToClassRoom(
     @Param('classInviteCode') classInviteCode: string,
-    @ReqUser() reqUser: ReqUserTokenPayload,
     @Body() body: EnrollStudentDto,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =

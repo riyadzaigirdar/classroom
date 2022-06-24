@@ -12,7 +12,7 @@ import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RedisCacheService } from './redis.service';
 import { CreateTeacherDto } from '../dtos/createTeacher.dto';
-import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
+import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { EmailService } from 'src/modules/email/services/email.service';
@@ -134,7 +134,7 @@ export class UserService {
     };
   }
 
-  async validateToken(req: any): Promise<ReqUserTokenPayload> {
+  async validateToken(req: any): Promise<ReqUserTokenPayloadDto> {
     let decodedUser;
     try {
       decodedUser = jwt.verify(
@@ -204,7 +204,7 @@ export class UserService {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-      } as ReqUserTokenPayload,
+      } as ReqUserTokenPayloadDto,
       process.env.JWT_SECRET,
       {
         expiresIn: time,
