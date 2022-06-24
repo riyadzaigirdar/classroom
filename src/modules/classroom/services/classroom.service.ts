@@ -1,13 +1,15 @@
-import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { getConnection, getManager, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
-import { Submission } from '../entities/submission.entity';
-import { CreateClassRoom } from '../dtos/createClassroom.dto';
+import { CreateClassRoom } from '../dtos/create-classroom.dto';
 import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
 import { USERROLE_TYPE } from 'src/common/enums';
+import { EnrollStudentDto } from '../dtos/enroll-student.dto';
+import { UserService } from 'src/modules/user/services/user.service';
+import { EnrolledStudent } from '../entities/enrolled_students.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 @Injectable()
 export class ClassRoomService {
@@ -15,10 +17,11 @@ export class ClassRoomService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(ClassRoom)
     private classRoomRepository: Repository<ClassRoom>,
-    @InjectRepository(Submission)
-    private submissionRepository: Repository<Submission>,
+    @InjectRepository(EnrolledStudent)
+    private enrolledStudentRepository: Repository<EnrolledStudent>,
+    private readonly userService: UserService,
   ) {}
-
+  EnrolledStudent;
   async createClassRoom(
     reqUser: ReqUserTokenPayload,
     body: CreateClassRoom,
@@ -89,6 +92,47 @@ export class ClassRoomService {
         result,
       },
       message: `Successfully listed classroom`,
+    };
+  }
+
+  async enrollStudentToClassRoom(
+    classInviteCode: string,
+    body: EnrollStudentDto,
+  ): Promise<ServiceResponseDto> {
+    let foundClassRoom = await this.classRoomRepository.findOne({
+      where: { inviteCode: classInviteCode },
+    });
+
+    if (!foundClassRoom) throw new BadRequestException('Invalid invite code');
+
+    let student: User;
+    let enrolledStudent: EnrolledStudent;
+    try {
+      await getManager().transaction(async (entityManager) => {
+        student = await this.userService.createOrGetStudent(
+          entityManager,
+          body,
+        );
+        enrolledStudent = await entityManager.save(
+          await this.enrolledStudentRepository.create({
+            studentId: student.id,
+            classRoomId: foundClassRoom.id,
+          }),
+        );
+      });
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Something went wrong! try again later');
+    }
+
+    return {
+      data: {
+        id: student.id,
+        email: student.email,
+        fullName: student.fullName,
+        enrolledClassId: foundClassRoom.id,
+      },
+      message: 'Successfully enrolled to class',
     };
   }
 }

@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RedisCacheService } from './redis.service';
@@ -16,11 +16,16 @@ import { ReqUserTokenPayload, ServiceResponseDto } from 'src/common/dto';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { EmailService } from 'src/modules/email/services/email.service';
+import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled_students.entity';
+import { EnrollStudentDto } from 'src/modules/classroom/dtos/enroll-student.dto';
+import { StudentMeta } from '../entities/student_meta';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(StudentMeta)
+    private studentMetaRepository: Repository<StudentMeta>,
     private readonly emailService: EmailService,
     private readonly redisCacheService: RedisCacheService,
   ) {}
@@ -56,6 +61,48 @@ export class UserService {
       },
       message: 'Successfully added teacher',
     };
+  }
+
+  async createOrGetStudent(
+    entityManager: EntityManager,
+    body: EnrollStudentDto,
+  ): Promise<User> {
+    let found = await this.userRepository.findOne({
+      where: { email: body.email },
+    });
+
+    if (found && found.role !== USERROLE_TYPE.STUDENT)
+      throw new BadRequestException('Only student account allowed to enroll');
+
+    if (found && !this.checkPasswordMatch(found.password, body.password))
+      throw new BadRequestException("Password didn't match");
+
+    if (
+      found &&
+      (
+        await this.studentMetaRepository.findOne({
+          where: { userId: found.id },
+        })
+      ).studentId !== body.studentId
+    )
+      throw new BadRequestException("Student id didn't match");
+
+    let studentSaved: User = await entityManager.save(
+      await this.userRepository.create({
+        ...body,
+        role: USERROLE_TYPE.STUDENT,
+        password: await this.hashPassword(body.password),
+      }),
+    );
+
+    let studentMeta: StudentMeta = await entityManager.save(
+      await this.studentMetaRepository.create({
+        userId: studentSaved.id,
+        studentId: body.studentId,
+      }),
+    );
+
+    return studentSaved;
   }
 
   async login(body: LoginRequestBodyDto): Promise<ServiceResponseDto> {

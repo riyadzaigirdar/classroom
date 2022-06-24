@@ -4,7 +4,7 @@ import { CLASSROOM_STATUS_TYPE } from 'src/common/enums';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractRepository } from '../../../common/abstract-repository';
-import { EnrolledStudent } from './enrolled-students.entity';
+import { EnrolledStudent } from './enrolled_students.entity';
 
 @Entity('class_room')
 export class ClassRoom extends AbstractRepository {

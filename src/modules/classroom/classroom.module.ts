@@ -11,13 +11,15 @@ import { PostController } from './controllers/post.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { UserModule } from '../user/user.module';
 import { AdminClassRoomController } from './controllers/admin.classroom.controller';
-import { EnrolledStudent } from './entities/enrolled-students.entity';
+import { EnrolledStudent } from './entities/enrolled_students.entity';
+import { PublicClassRoomController } from './controllers/public.classrool.controller';
 @Module({
   imports: [
     UserModule,
     TypeOrmModule.forFeature([ClassRoom, Post, Submission, EnrolledStudent]),
   ],
   controllers: [
+    PublicClassRoomController,
     AdminClassRoomController,
     ClassRoomController,
     PostController,

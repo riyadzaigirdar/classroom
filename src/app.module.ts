@@ -21,6 +21,7 @@ import { AllExceptionFilter } from './common/filter';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
+      name: 'default',
       useFactory: async (config: ConfigService) => {
         return {
           ...config.get('database'),
@@ -29,7 +30,6 @@ import { AllExceptionFilter } from './common/filter';
         };
       },
     }),
-
     UserModule,
     ClassroomModule,
     EmailModule,

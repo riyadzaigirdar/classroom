@@ -11,7 +11,7 @@ import { RedisCacheService } from './services/redis.service';
 import { AdminUserController } from './controllers/admin.controller';
 import { PublicUserController } from './controllers/public.user.controller';
 import { EmailService } from '../email/services/email.service';
-import { StudentMeta } from './entities/student-meta';
+import { StudentMeta } from './entities/student_meta';
 
 @Module({
   imports: [

@@ -5,8 +5,8 @@ import { ulid } from 'ulid';
 import { Submission } from 'src/modules/classroom/entities/submission.entity';
 import { Post } from 'src/modules/classroom/entities/post.entity';
 import { ClassRoom } from 'src/modules/classroom/entities/classroom.entity';
-import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled-students.entity';
-import { StudentMeta } from './student-meta';
+import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled_students.entity';
+import { StudentMeta } from './student_meta';
 
 @Entity('user')
 export class User extends AbstractRepository {

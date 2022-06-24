@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Param,
   ParseIntPipe,
   Post,
   Query,
@@ -16,16 +17,17 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { AuthorizeGuard } from 'src/common/guard';
-import { CreateClassRoom } from '../dtos/createClassroom.dto';
+import { CreateClassRoom } from '../dtos/create-classroom.dto';
+import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { ClassRoomService } from '../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
-@Permissions('classroom', ['teacher'])
 @Controller('classroom')
 export class ClassRoomController {
   constructor(private readonly classRoomService: ClassRoomService) {}
 
   @Post('/')
+  @Permissions('classroom', ['teacher'])
   async createClassRoom(
     @ReqUser() reqUser: ReqUserTokenPayload,
     @Body() body: CreateClassRoom,
@@ -41,6 +43,7 @@ export class ClassRoomController {
   }
 
   @Get('/')
+  @Permissions('classroom', ['teacher'])
   async listClassRoom(
     @ReqUser() reqUser: ReqUserTokenPayload,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
