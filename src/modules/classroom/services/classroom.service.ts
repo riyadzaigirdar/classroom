@@ -15,6 +15,7 @@ import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { UserService } from 'src/modules/user/services/user.service';
 import { EnrolledStudent } from '../entities/enrolled_students.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import { UpdateClassRoomDto } from '../dtos/update-classroom.dto';
 
 @Injectable()
 export class ClassRoomService {
@@ -26,7 +27,7 @@ export class ClassRoomService {
     private enrolledStudentRepository: Repository<EnrolledStudent>,
     private readonly userService: UserService,
   ) {}
-  EnrolledStudent;
+
   async createClassRoom(
     reqUser: ReqUserTokenPayloadDto,
     body: CreateClassRoomDto,
@@ -178,6 +179,45 @@ export class ClassRoomService {
         enrolledClassId: foundClassRoom.id,
       },
       message: 'Successfully enrolled to class',
+    };
+  }
+
+  async updateClassRoom(
+    reqUser: ReqUserTokenPayloadDto,
+    classRoomId: number,
+    body: Partial<UpdateClassRoomDto>,
+  ): Promise<ServiceResponseDto> {
+    let foundClassRoom = await this.classRoomRepository.findOne({
+      where: { id: classRoomId },
+    });
+
+    if (!foundClassRoom)
+      throw new BadRequestException('Classroom with that id not found');
+
+    if (
+      reqUser.role === USERROLE_TYPE.TEACHER &&
+      foundClassRoom.teacherId !== reqUser.id
+    )
+      throw new ForbiddenException(
+        'Teacher not permitted to update this classroom',
+      );
+
+    Object.keys((item) => {
+      foundClassRoom[item] = body[item];
+    });
+
+    let classSaved = await this.classRoomRepository.save(foundClassRoom);
+
+    return {
+      data: {
+        id: classSaved.id,
+        className: classSaved.className,
+        subjectName: classSaved.subjectName,
+        status: classSaved.status,
+        inviteCode: classSaved.inviteCode,
+        createdBy: classSaved.createdBy,
+      },
+      message: 'Successfully updated classroom',
     };
   }
 

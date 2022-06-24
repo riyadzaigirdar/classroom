@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
 import { AuthorizeGuard } from 'src/common/guard';
 import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
 import { EnrollStudentDto } from '../dtos/enroll-student.dto';
+import { UpdateClassRoomDto } from '../dtos/update-classroom.dto';
 import { ClassRoomService } from '../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
@@ -36,6 +38,24 @@ export class ClassRoomController {
       await this.classRoomService.createClassRoom(reqUser, body);
     return {
       code: 201,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Put(':classRoomId')
+  @Permissions('classroom', ['teacher'])
+  async updateClassRoom(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('classRoomId') classRoomId: number,
+    @Body() body: Partial<UpdateClassRoomDto>,
+  ) {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.updateClassRoom(reqUser, classRoomId, body);
+
+    return {
+      code: 200,
       success: true,
       message,
       data,
