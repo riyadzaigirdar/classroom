@@ -71,11 +71,13 @@ export class UserService {
       where: { email: body.email },
     });
 
-    if (found && found.role !== USERROLE_TYPE.STUDENT)
+    if (found && found.role !== USERROLE_TYPE.STUDENT) {
       throw new BadRequestException('Only student account allowed to enroll');
+    }
 
-    if (found && !this.checkPasswordMatch(found.password, body.password))
+    if (found && !this.checkPasswordMatch(found.password, body.password)) {
       throw new BadRequestException("Password didn't match");
+    }
 
     if (
       found &&
@@ -84,8 +86,13 @@ export class UserService {
           where: { userId: found.id },
         })
       ).studentId !== body.studentId
-    )
+    ) {
       throw new BadRequestException("Student id didn't match");
+    }
+
+    if (found) {
+      return found;
+    }
 
     let studentSaved: User = await entityManager.save(
       await this.userRepository.create({

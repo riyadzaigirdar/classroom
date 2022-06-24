@@ -131,7 +131,11 @@ export class ClassRoomService {
         );
       });
     } catch (error) {
-      throw new BadRequestException('Something went wrong! try again later');
+      throw new BadRequestException(
+        error instanceof BadRequestException
+          ? error['message']
+          : 'Something went wrong! Please try again later',
+      );
     }
 
     return {
