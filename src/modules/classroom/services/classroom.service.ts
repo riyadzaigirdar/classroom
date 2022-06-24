@@ -107,12 +107,22 @@ export class ClassRoomService {
 
     let student: User;
     let enrolledStudent: EnrolledStudent;
+
     try {
       await getManager().transaction(async (entityManager) => {
         student = await this.userService.createOrGetStudent(
           entityManager,
           body,
         );
+
+        if (
+          await this.enrolledStudentRepository.findOne({
+            where: { studentId: student.id, classRoomId: foundClassRoom.id },
+          })
+        ) {
+          throw new BadRequestException('Student Already enrolled');
+        }
+
         enrolledStudent = await entityManager.save(
           await this.enrolledStudentRepository.create({
             studentId: student.id,
@@ -121,7 +131,6 @@ export class ClassRoomService {
         );
       });
     } catch (error) {
-      console.log(error);
       throw new BadRequestException('Something went wrong! try again later');
     }
 
