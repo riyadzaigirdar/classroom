@@ -1,10 +1,12 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -21,6 +23,7 @@ import {
 import { AuthorizeGuard } from 'src/common/guard';
 import { submissionMulterConfig } from 'src/common/multer';
 import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
+import { UpdateSubmissionDto } from '../dtos/update-submission.dto';
 import { SubmissionService } from '../services/submission.service';
 
 @UseGuards(AuthorizeGuard)
@@ -58,6 +61,28 @@ export class SubmissionController {
         reqUser,
         submissionId,
         file,
+      );
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Put(':submissionId')
+  @Permissions('classroom', ['teacher'])
+  async updateSubmittion(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('submissionId') submissionId: number,
+    @Body() body: UpdateSubmissionDto,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.submissionService.updateSubmission(
+        reqUser,
+        submissionId,
+        body,
       );
 
     return {

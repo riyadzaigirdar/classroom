@@ -12,6 +12,7 @@ import { QuerySubmissionDto } from '../dtos/query-submission.dto';
 import { count } from 'console';
 import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 import { MEDIA_HOST } from 'src/common/constants';
+import { UpdateSubmissionDto } from '../dtos/update-submission.dto';
 
 @Injectable()
 export class SubmissionService {
@@ -199,8 +200,9 @@ export class SubmissionService {
       throw new BadRequestException('Submission with that id not found');
 
     if (
-      foundSubmission.status === SUBMISSION_STATUS_TYPE.EXAMINED ||
-      foundSubmission.status === SUBMISSION_STATUS_TYPE.EXPIRED
+      (foundSubmission.status === SUBMISSION_STATUS_TYPE.EXAMINED ||
+        foundSubmission.status === SUBMISSION_STATUS_TYPE.EXPIRED) &&
+      reqUser.role !== USERROLE_TYPE.ADMIN
     )
       throw new BadRequestException(
         'Submission is already examined or expired',
@@ -215,6 +217,54 @@ export class SubmissionService {
     return {
       data: savedSubmission,
       message: 'Successfully added image',
+    };
+  }
+
+  async updateSubmission(
+    reqUser: ReqUserTokenPayloadDto,
+    submissionId: number,
+    body: UpdateSubmissionDto,
+  ): Promise<ServiceResponseDto> {
+    let foundSubmission: Submission = await this.submissionRepository.findOne({
+      where: { id: submissionId },
+    });
+
+    if (!foundSubmission)
+      throw new BadRequestException('Submission with that id not found');
+
+    let post = await this.postRepository.findOne({
+      where: { id: foundSubmission.postId },
+    });
+
+    if (
+      reqUser.role !== USERROLE_TYPE.ADMIN &&
+      (
+        await this.classRoomRepository.findOne({
+          where: {
+            teacherId: reqUser.id,
+            id: post.classRoomId,
+          },
+        })
+      ).id
+    )
+      throw new BadRequestException(
+        'Teacher not permitted to update this info',
+      );
+
+    if (post.totalMarks < body.obtainedMarks) {
+      throw new BadRequestException(
+        "Obtained marks can't be greater than total marks",
+      );
+    }
+
+    foundSubmission.obtainedMarks = body.obtainedMarks;
+    foundSubmission.status = SUBMISSION_STATUS_TYPE.EXAMINED;
+
+    let data = await this.submissionRepository.save(foundSubmission);
+
+    return {
+      data,
+      message: 'Successfully updated submission',
     };
   }
 }

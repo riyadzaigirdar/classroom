@@ -26,6 +26,7 @@ export class PublicClassRoomController {
         classInviteCode,
         body,
       );
+
     return {
       code: 201,
       success: true,
