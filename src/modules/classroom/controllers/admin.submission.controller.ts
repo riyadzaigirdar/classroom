@@ -12,7 +12,7 @@ import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('submission', ['admin'])
-@Controller('admin/post')
+@Controller('admin/submission')
 export class AdminSubmissionController {
   constructor(private readonly submissionService: SubmissionService) {}
 

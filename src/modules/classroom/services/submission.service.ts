@@ -124,7 +124,7 @@ export class SubmissionService {
       .createQueryBuilder('submission')
       .leftJoinAndSelect('submission.assigned', 'assigned')
       .leftJoinAndSelect('submission.post', 'post')
-      .leftJoinAndSelect('post.classroom', 'classroom');
+      .leftJoinAndSelect('post.classRoom', 'classroom');
 
     if (reqUser.role === USERROLE_TYPE.TEACHER) {
       baseQuery.andWhere('classroom.teacherId = :teacherId', {
@@ -137,7 +137,7 @@ export class SubmissionService {
         assignedId: reqUser.id,
       });
     }
-
+    console.log(query);
     if (query.postId) {
       baseQuery.andWhere('post.id = :postId', { postId: query.postId });
     }

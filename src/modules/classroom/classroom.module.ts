@@ -14,12 +14,14 @@ import { AdminClassRoomController } from './controllers/admin.classroom.controll
 import { EnrolledStudent } from './entities/enrolled_students.entity';
 import { PublicClassRoomController } from './controllers/public.classroom.controller';
 import { AdminPostController } from './controllers/admin.post.controller';
+import { AdminSubmissionController } from './controllers/admin.submission.controller';
 @Module({
   imports: [
     UserModule,
     TypeOrmModule.forFeature([ClassRoom, Post, Submission, EnrolledStudent]),
   ],
   controllers: [
+    AdminSubmissionController,
     PublicClassRoomController,
     AdminClassRoomController,
     AdminPostController,
