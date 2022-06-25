@@ -137,7 +137,7 @@ export class SubmissionService {
         assignedId: reqUser.id,
       });
     }
-    console.log(query);
+
     if (query.postId) {
       baseQuery.andWhere('post.id = :postId', { postId: query.postId });
     }
@@ -152,8 +152,8 @@ export class SubmissionService {
 
     let result = await baseQuery
       .select([
-        'submission.postId as "postId"',
         'submission.id as "submissionId"',
+        'submission.postId as "postId"',
         'submission.submittedFile as "submittedFile"',
         'submission.submittedAt as "submittedAt"',
         'submission.obtainedMarks as "submissionObtainedMarks"',
@@ -161,6 +161,7 @@ export class SubmissionService {
         'assigned.id as "studentId"',
         'assigned.fullName as "studentFullName"',
         'post.id as "postId"',
+        'submission.createdAt as "assignedAt"',
       ])
       .limit(query.count)
       .offset((query.page - 1) * query.count)

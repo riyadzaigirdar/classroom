@@ -15,5 +15,5 @@ export class QuerySubmissionDto {
 
   @IsOptional()
   @IsNumber()
-  count = 10;
+  count: number = 10;
 }

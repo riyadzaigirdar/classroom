@@ -41,7 +41,6 @@ export class AdminUserController {
   @Get('/')
   @HttpCode(200)
   async listUser(@Query() query: ListUserQueryDto): Promise<ResponseDto> {
-    console.log(query);
     let { data, message }: ServiceResponseDto = await this.userService.listUser(
       query,
     );

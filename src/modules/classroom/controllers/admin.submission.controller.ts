@@ -18,8 +18,8 @@ export class AdminSubmissionController {
 
   @Get('')
   async listSubmimissions(
-    @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Query() query: QueryListSubmissionDto,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
       await this.submissionService.listSubmissions(reqUser, query);
