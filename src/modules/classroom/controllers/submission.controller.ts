@@ -1,4 +1,16 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Permissions } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
 import {
@@ -7,6 +19,7 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { AuthorizeGuard } from 'src/common/guard';
+import { submissionMulterConfig } from 'src/common/multer';
 import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 import { SubmissionService } from '../services/submission.service';
 
@@ -23,6 +36,30 @@ export class SubmissionController {
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
       await this.submissionService.listSubmissions(reqUser, query);
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @HttpCode(200)
+  @Post(':submissionId/submit-file')
+  @Permissions('classroom', ['student'])
+  @UseInterceptors(FileInterceptor('file', submissionMulterConfig))
+  async submitFileSubmission(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('submissionId', new ParseIntPipe()) submissionId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.submissionService.submitFileSubmission(
+        reqUser,
+        submissionId,
+        file,
+      );
+
     return {
       code: 200,
       success: true,

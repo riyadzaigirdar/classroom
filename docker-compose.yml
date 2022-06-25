@@ -23,6 +23,7 @@ services:
       - REDIS_HOST=cache
       - REDIS_PORT=6379
       - REDIS_DB=0
+      - MEDIA_HOST=http://127.0.0.1:5001
     depends_on:
       - db
       - cache

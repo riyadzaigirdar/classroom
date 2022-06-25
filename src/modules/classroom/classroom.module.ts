@@ -10,11 +10,11 @@ import { ClassRoomController } from './controllers/classroom.controller';
 import { PostController } from './controllers/post.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { UserModule } from '../user/user.module';
-import { AdminClassRoomController } from './controllers/admin.classroom.controller';
+import { AdminClassRoomController } from './controllers/admin/admin.classroom.controller';
 import { EnrolledStudent } from './entities/enrolled_students.entity';
-import { PublicClassRoomController } from './controllers/public.classroom.controller';
-import { AdminPostController } from './controllers/admin.post.controller';
-import { AdminSubmissionController } from './controllers/admin.submission.controller';
+import { PublicClassRoomController } from './controllers/public/public.classroom.controller';
+import { AdminPostController } from './controllers/admin/admin.post.controller';
+import { AdminSubmissionController } from './controllers/admin/admin.submission.controller';
 @Module({
   imports: [
     UserModule,

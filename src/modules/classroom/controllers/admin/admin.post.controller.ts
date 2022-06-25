@@ -8,17 +8,17 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PostService } from '../services/post.service';
+import { PostService } from '../../services/post.service';
 import { Permissions } from 'src/common/decorator/controller.decorator';
-import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreatePostDto } from '../../dtos/create-post.dto';
 import {
   ReqUserTokenPayloadDto,
   ResponseDto,
   ServiceResponseDto,
 } from 'src/common/dto';
 import { ReqUser } from 'src/common/decorator/param.decortor';
-import { QuerySubmissionDto } from '../dtos/query-submission.dto';
-import { SubmissionService } from '../services/submission.service';
+import { QuerySubmissionDto } from '../../dtos/query-submission.dto';
+import { SubmissionService } from '../../services/submission.service';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('post', ['admin'])

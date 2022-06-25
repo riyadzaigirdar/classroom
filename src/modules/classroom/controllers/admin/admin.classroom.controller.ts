@@ -14,10 +14,10 @@ import { Permissions } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 
-import { AuthorizeGuard } from '../../../common/guard';
-import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
-import { UpdateClassRoomDto } from '../dtos/update-classroom.dto';
-import { ClassRoomService } from '../services/classroom.service';
+import { AuthorizeGuard } from '../../../../common/guard';
+import { CreateClassRoomDto } from '../../dtos/create-classroom.dto';
+import { UpdateClassRoomDto } from '../../dtos/update-classroom.dto';
+import { ClassRoomService } from '../../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('classroom', ['admin'])

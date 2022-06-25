@@ -7,10 +7,11 @@ import { ClassRoom } from '../entities/classroom.entity';
 import { Submission } from '../entities/submission.entity';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { EnrolledStudent } from '../entities/enrolled_students.entity';
-import { USERROLE_TYPE } from 'src/common/enums';
+import { SUBMISSION_STATUS_TYPE, USERROLE_TYPE } from 'src/common/enums';
 import { QuerySubmissionDto } from '../dtos/query-submission.dto';
 import { count } from 'console';
 import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
+import { MEDIA_HOST } from 'src/common/constants';
 
 @Injectable()
 export class SubmissionService {
@@ -110,7 +111,10 @@ export class SubmissionService {
     return {
       data: {
         total,
-        result,
+        result: result.map((item) => ({
+          ...item,
+          submittedFile: MEDIA_HOST + '/' + item.submittedFile,
+        })),
       },
       message: 'Successsfully listed submission of a post',
     };
@@ -170,10 +174,47 @@ export class SubmissionService {
 
     return {
       data: {
-        result,
+        result: result.map((item) => ({
+          ...item,
+          submittedFile: MEDIA_HOST + '/' + item.submittedFile,
+        })),
         total,
       },
       message: 'Successfully listed submission',
+    };
+  }
+
+  async submitFileSubmission(
+    reqUser: ReqUserTokenPayloadDto,
+    submissionId: number,
+    file: Express.Multer.File,
+  ): Promise<ServiceResponseDto> {
+    if (!file) throw new BadRequestException('No file given');
+
+    let foundSubmission = await this.submissionRepository.findOne({
+      where: { id: submissionId },
+    });
+
+    if (!foundSubmission)
+      throw new BadRequestException('Submission with that id not found');
+
+    if (
+      foundSubmission.status === SUBMISSION_STATUS_TYPE.EXAMINED ||
+      foundSubmission.status === SUBMISSION_STATUS_TYPE.EXPIRED
+    )
+      throw new BadRequestException(
+        'Submission is already examined or expired',
+      );
+
+    foundSubmission.submittedFile = file.path;
+    foundSubmission.submittedAt = new Date();
+    foundSubmission.status = SUBMISSION_STATUS_TYPE.SUBMITTED;
+
+    let savedSubmission = await this.submissionRepository.save(foundSubmission);
+
+    return {
+      data: savedSubmission,
+      message: 'Successfully added image',
     };
   }
 }

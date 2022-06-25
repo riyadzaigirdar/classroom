@@ -7,8 +7,8 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { AuthorizeGuard } from 'src/common/guard';
-import { EnrollStudentDto } from '../dtos/enroll-student.dto';
-import { ClassRoomService } from '../services/classroom.service';
+import { EnrollStudentDto } from '../../dtos/enroll-student.dto';
+import { ClassRoomService } from '../../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
 @AllowAnonymous('classroom')

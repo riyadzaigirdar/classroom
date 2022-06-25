@@ -7,8 +7,8 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { ReqUser } from 'src/common/decorator/param.decortor';
-import { SubmissionService } from '../services/submission.service';
-import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
+import { SubmissionService } from '../../services/submission.service';
+import { QueryListSubmissionDto } from '../../dtos/query-list-submission.dto';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('submission', ['admin'])
