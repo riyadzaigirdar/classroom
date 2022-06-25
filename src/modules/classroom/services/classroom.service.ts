@@ -262,7 +262,7 @@ export class ClassRoomService {
       ])
       .limit(count)
       .offset((page - 1) * count)
-      .orderBy('order.createdAt', 'DESC')
+      .orderBy('enrolled.createdAt', 'DESC')
       .getRawMany();
 
     return {

@@ -1,5 +1,13 @@
 import { AuthorizeGuard } from 'src/common/guard';
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PostService } from '../services/post.service';
 import { Permissions } from 'src/common/decorator/controller.decorator';
 import { CreatePostDto } from '../dtos/create-post.dto';
@@ -9,12 +17,17 @@ import {
   ServiceResponseDto,
 } from 'src/common/dto';
 import { ReqUser } from 'src/common/decorator/param.decortor';
+import { QuerySubmissionDto } from '../dtos/query-submission.dto';
+import { SubmissionService } from '../services/submission.service';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('classroom', ['admin'])
-@Controller('admin/classroom')
+@Controller('admin/post')
 export class AdminPostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly submissionService: SubmissionService,
+  ) {}
 
   @Post('')
   async createPost(
@@ -25,6 +38,26 @@ export class AdminPostController {
       await this.postService.createPost(reqUser, body);
     return {
       code: 201,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Get(':postId/submissions')
+  async listSubmimissionUnderPost(
+    @Param('postId') postId: number,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Query() query: QuerySubmissionDto,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.submissionService.listSubmimissionOfAPost(
+        reqUser,
+        postId,
+        query,
+      );
+    return {
+      code: 200,
       success: true,
       message,
       data,
