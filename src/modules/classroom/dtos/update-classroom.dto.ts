@@ -1,4 +1,4 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { CLASSROOM_STATUS_TYPE } from 'src/common/enums';
 import { CreateClassRoomDto } from './create-classroom.dto';
 

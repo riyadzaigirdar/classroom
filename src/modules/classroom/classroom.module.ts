@@ -11,10 +11,12 @@ import { PostController } from './controllers/post.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { UserModule } from '../user/user.module';
 import { AdminClassRoomController } from './controllers/admin/admin.classroom.controller';
-import { EnrolledStudent } from './entities/enrolled_students.entity';
+import { EnrolledStudent } from './entities/enrolled-students.entity';
 import { PublicClassRoomController } from './controllers/public/public.classroom.controller';
 import { AdminPostController } from './controllers/admin/admin.post.controller';
 import { AdminSubmissionController } from './controllers/admin/admin.submission.controller';
+import { ResultController } from './controllers/result.controller';
+import { EnrolledStudentService } from './services/enrolled-student.service';
 @Module({
   imports: [
     UserModule,
@@ -23,12 +25,18 @@ import { AdminSubmissionController } from './controllers/admin/admin.submission.
   controllers: [
     AdminSubmissionController,
     PublicClassRoomController,
+    ResultController,
     AdminClassRoomController,
     AdminPostController,
     ClassRoomController,
     PostController,
     SubmissionController,
   ],
-  providers: [ClassRoomService, PostService, SubmissionService],
+  providers: [
+    ClassRoomService,
+    PostService,
+    SubmissionService,
+    EnrolledStudentService,
+  ],
 })
 export class ClassroomModule {}

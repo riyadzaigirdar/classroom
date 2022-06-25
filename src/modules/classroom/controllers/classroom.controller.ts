@@ -80,6 +80,23 @@ export class ClassRoomController {
     };
   }
 
+  @Get('/:classRoomId/get-result')
+  @Permissions('classroom', ['student'])
+  async getResultOfClass(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('classRoomId') classRoomId: number,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.getResult(reqUser, classRoomId);
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
   @Get(':classRoomId/enrolled-students')
   @Permissions('classroom', ['teacher'])
   async listEnrolledStudentsOfClassRoom(

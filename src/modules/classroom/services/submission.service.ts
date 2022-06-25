@@ -1,12 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
 import { Submission } from '../entities/submission.entity';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
-import { EnrolledStudent } from '../entities/enrolled_students.entity';
+import { EnrolledStudent } from '../entities/enrolled-students.entity';
 import { SUBMISSION_STATUS_TYPE, USERROLE_TYPE } from 'src/common/enums';
 import { QuerySubmissionDto } from '../dtos/query-submission.dto';
 import { count } from 'console';
@@ -78,7 +83,7 @@ export class SubmissionService {
         })
       ).teacherId !== reqUser.id
     ) {
-      throw new BadRequestException(
+      throw new ForbiddenException(
         'Teacher not permitted to access this information',
       );
     }
@@ -220,11 +225,11 @@ export class SubmissionService {
       where: { id: body.postId },
     });
 
-    if (!post) throw new BadRequestException("Post with that id doesn't exist");
+    if (!post) throw new NotFoundException("Post with that id doesn't exist");
 
     let student: User = await this.userService.getUser({ id: body.assignedId });
 
-    if (!student) throw new BadRequestException('Assignee not found');
+    if (!student) throw new NotFoundException('Assignee not found');
 
     if (student.role !== USERROLE_TYPE.STUDENT)
       throw new BadRequestException('Assignee is not a student');
@@ -234,7 +239,7 @@ export class SubmissionService {
     });
 
     if (submissionFound)
-      throw new BadRequestException(
+      throw new ForbiddenException(
         `Assignee already has a submission ${submissionFound.status} in post`,
       );
 
@@ -260,16 +265,14 @@ export class SubmissionService {
     });
 
     if (!foundSubmission)
-      throw new BadRequestException('Submission with that id not found');
+      throw new NotFoundException('Submission with that id not found');
 
     if (
       (foundSubmission.status === SUBMISSION_STATUS_TYPE.EXAMINED ||
         foundSubmission.status === SUBMISSION_STATUS_TYPE.EXPIRED) &&
       reqUser.role !== USERROLE_TYPE.ADMIN
     )
-      throw new BadRequestException(
-        'Submission is already examined or expired',
-      );
+      throw new ForbiddenException('Submission is already examined or expired');
 
     foundSubmission.submittedFile = file.path;
     foundSubmission.submittedAt = new Date();
@@ -293,7 +296,7 @@ export class SubmissionService {
     });
 
     if (!foundSubmission)
-      throw new BadRequestException('Submission with that id not found');
+      throw new NotFoundException('Submission with that id not found');
 
     let post = await this.postRepository.findOne({
       where: { id: foundSubmission.postId },
@@ -310,12 +313,10 @@ export class SubmissionService {
         })
       ).id
     )
-      throw new BadRequestException(
-        'Teacher not permitted to update this info',
-      );
+      throw new ForbiddenException('Teacher not permitted to update this info');
 
     if (post.totalMarks < body.obtainedMarks) {
-      throw new BadRequestException(
+      throw new ForbiddenException(
         "Obtained marks can't be greater than total marks",
       );
     }

@@ -17,7 +17,7 @@ import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { LoginRequestBodyDto, LoginServiceData } from '../dtos/login.dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { EmailService } from 'src/modules/email/services/email.service';
-import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled_students.entity';
+import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled-students.entity';
 import { EnrollStudentDto } from 'src/modules/classroom/dtos/enroll-student.dto';
 import { StudentMeta } from '../entities/student_meta';
 import { ListUserQueryDto } from '../dtos/list-user-query.dto';

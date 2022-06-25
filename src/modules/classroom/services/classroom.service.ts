@@ -10,10 +10,10 @@ import { Post } from '../entities/post.entity';
 import { ClassRoom } from '../entities/classroom.entity';
 import { CreateClassRoomDto } from '../dtos/create-classroom.dto';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
-import { USERROLE_TYPE } from 'src/common/enums';
+import { CLASSROOM_STATUS_TYPE, USERROLE_TYPE } from 'src/common/enums';
 import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { UserService } from 'src/modules/user/services/user.service';
-import { EnrolledStudent } from '../entities/enrolled_students.entity';
+import { EnrolledStudent } from '../entities/enrolled-students.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { UpdateClassRoomDto } from '../dtos/update-classroom.dto';
 
@@ -148,7 +148,7 @@ export class ClassRoomService {
             where: { studentId: student.id, classRoomId: foundClassRoom.id },
           })
         ) {
-          throw new BadRequestException('Student Already enrolled');
+          throw new ForbiddenException('Student Already enrolled');
         }
 
         enrolledStudent = await entityManager.save(
@@ -191,7 +191,7 @@ export class ClassRoomService {
     });
 
     if (!foundClassRoom)
-      throw new BadRequestException('Classroom with that id not found');
+      throw new NotFoundException('Classroom with that id not found');
 
     if (
       reqUser.role === USERROLE_TYPE.TEACHER &&
@@ -200,6 +200,20 @@ export class ClassRoomService {
       throw new ForbiddenException(
         'Teacher not permitted to update this classroom',
       );
+
+    if (
+      body.status === CLASSROOM_STATUS_TYPE.ENDED &&
+      foundClassRoom.status === CLASSROOM_STATUS_TYPE.ENDED
+    )
+      throw new ForbiddenException('Class room has already ended');
+
+    if (
+      body.status === CLASSROOM_STATUS_TYPE.ENDED &&
+      (await this.enrolledStudentRepository.findOne({
+        where: { curatedResult: null },
+      }))
+    )
+      throw new ForbiddenException('Some students missing curated result');
 
     Object.keys(body).map((item) => {
       foundClassRoom[item] = body[item];
@@ -217,6 +231,33 @@ export class ClassRoomService {
         createdBy: classSaved.createdBy,
       },
       message: 'Successfully updated classroom',
+    };
+  }
+
+  async getResult(
+    reqUser: ReqUserTokenPayloadDto,
+    classRoomId: number,
+  ): Promise<ServiceResponseDto> {
+    let classRoom: ClassRoom = await this.classRoomRepository.findOne({
+      where: { id: classRoomId },
+    });
+
+    if (!classRoom)
+      throw new NotFoundException('Classroom with that id not found');
+
+    if (classRoom.status != CLASSROOM_STATUS_TYPE.ENDED)
+      throw new ForbiddenException('Class has not ended');
+
+    let enrolled = await this.enrolledStudentRepository.findOne({
+      where: { classRoomId, studentId: reqUser.id },
+    });
+
+    if (!enrolled)
+      throw new ForbiddenException('You are not enrolled to the class');
+
+    return {
+      message: 'Successfully get result',
+      data: enrolled,
     };
   }
 

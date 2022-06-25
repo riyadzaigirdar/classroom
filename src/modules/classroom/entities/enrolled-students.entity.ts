@@ -11,6 +11,9 @@ export class EnrolledStudent extends AbstractRepository {
   @Column({ type: 'int', nullable: false })
   studentId: number;
 
+  @Column({ type: 'float', nullable: true, default: null })
+  curatedResult: number;
+
   // ===================== VIRTUAL COLUMN ======================= //
   @ManyToOne((type) => ClassRoom, (classroom) => classroom.enrolled_students, {
     nullable: true,
