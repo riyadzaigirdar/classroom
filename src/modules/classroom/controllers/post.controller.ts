@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +19,7 @@ import {
 import { AuthorizeGuard } from 'src/common/guard';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { QuerySubmissionDto } from '../dtos/query-submission.dto';
+import { UpdatePostDto } from '../dtos/update-post.dto';
 import { PostService } from '../services/post.service';
 import { SubmissionService } from '../services/submission.service';
 
@@ -29,7 +32,7 @@ export class PostController {
   ) {}
 
   @Post('')
-  @Permissions('classroom', ['teacher'])
+  @Permissions('post', ['teacher'])
   async createPost(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Body() body: CreatePostDto,
@@ -44,8 +47,26 @@ export class PostController {
     };
   }
 
+  @HttpCode(200)
+  @Put(':postId')
+  @Permissions('post', ['teacher'])
+  async updatePost(
+    @Param('postId') postId: number,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Body() body: UpdatePostDto,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.postService.updatePost(reqUser, postId, body);
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
   @Get(':postId/submissions')
-  @Permissions('classroom', ['teacher'])
+  @Permissions('post-submission', ['teacher'])
   async listSubmimissionUnderPost(
     @Param('postId') postId: number,
     @ReqUser() reqUser: ReqUserTokenPayloadDto,

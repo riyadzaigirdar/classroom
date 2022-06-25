@@ -3,8 +3,10 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +21,7 @@ import {
 import { ReqUser } from 'src/common/decorator/param.decortor';
 import { QuerySubmissionDto } from '../../dtos/query-submission.dto';
 import { SubmissionService } from '../../services/submission.service';
+import { UpdatePostDto } from '../../dtos/update-post.dto';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('post', ['admin'])
@@ -38,6 +41,23 @@ export class AdminPostController {
       await this.postService.createPost(reqUser, body);
     return {
       code: 201,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @HttpCode(200)
+  @Put(':postId')
+  async updatePost(
+    @Param('postId') postId: number,
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Body() body: UpdatePostDto,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.postService.updatePost(reqUser, postId, body);
+    return {
+      code: 200,
       success: true,
       message,
       data,
