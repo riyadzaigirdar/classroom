@@ -21,7 +21,7 @@ export class Submission extends AbstractRepository {
   })
   submittedAt: Date;
 
-  @Column({ type: 'float', nullable: false, default: 0 })
+  @Column({ type: 'float', nullable: false, default: null })
   obtainedMarks: number;
 
   @Column({

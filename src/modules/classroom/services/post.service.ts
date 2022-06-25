@@ -9,6 +9,7 @@ import { CreatePostDto } from '../dtos/create-post.dto';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { SubmissionService } from './submission.service';
+import { UpdatePostDto } from '../dtos/update-post.dto';
 
 @Injectable()
 export class PostService {
@@ -63,6 +64,23 @@ export class PostService {
     return {
       data: post,
       message: 'Successfully created post',
+    };
+  }
+
+  async updatePost(
+    reqUser: ReqUserTokenPayloadDto,
+    id: number,
+    body: UpdatePostDto,
+  ): Promise<ServiceResponseDto> {
+    let post: Post = await this.postRepository.findOne({ where: { id } });
+
+    if (!post) throw new BadRequestException('Post with that id not found');
+
+    Object.keys(body).map((item) => (post[item] = body[item]));
+
+    return {
+      message: 'Successfully updated post',
+      data: await this.postRepository.save(post),
     };
   }
 }

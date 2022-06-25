@@ -13,6 +13,9 @@ import { count } from 'console';
 import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 import { MEDIA_HOST } from 'src/common/constants';
 import { UpdateSubmissionDto } from '../dtos/update-submission.dto';
+import { CreateSubmissionDto } from '../dtos/create-submission.dto';
+import { User } from 'src/modules/user/entities/user.entity';
+import { UserService } from 'src/modules/user/services/user.service';
 
 @Injectable()
 export class SubmissionService {
@@ -25,6 +28,7 @@ export class SubmissionService {
     private submissionRepository: Repository<Submission>,
     @InjectRepository(EnrolledStudent)
     private enrolledStudentRepository: Repository<EnrolledStudent>,
+    private readonly userService: UserService,
   ) {}
 
   async createPendingSubmissions(
@@ -56,6 +60,7 @@ export class SubmissionService {
     return submissionsSaved;
   }
 
+  // ================ ADMIN & TEACHER ================ //
   async listSubmimissionOfAPost(
     reqUser: ReqUserTokenPayloadDto,
     postId: number,
@@ -82,28 +87,39 @@ export class SubmissionService {
       .createQueryBuilder('submission')
       .leftJoinAndSelect('submission.assigned', 'assigned')
       .leftJoinAndSelect('submission.post', 'post')
-      .where('post.id = :postId', { postId });
+      .andWhere('post.id = :postId', { postId });
 
-    if (Object.keys(query).length === 0) {
+    let queryArray: string[] = [
+      'submission.postId as "postId"',
+      'submission.id as "submissionId"',
+      'submission.submittedFile as "submittedFile"',
+      'submission.submittedAt as "submittedAt"',
+      'submission.status as "submissionStatus"',
+      'assigned.id as "studentId"',
+      'assigned.fullName as "studentFullName"',
+      'post.type as "postType"',
+      'post.resultPublished as "resultPublished"',
+      'post.id as "postId"',
+    ];
+
+    if (query.status) {
       baseQuery.andWhere('submission.status = :status', {
         status: query.status,
       });
     }
 
+    if (query.resultPublished) {
+      console.log('yes');
+      baseQuery.andWhere('post.resultPublished = :resultPublished', {
+        resultPublished: query.resultPublished,
+      });
+      queryArray.push('submission.obtainedMarks as "submissionObtainerMarks"');
+    }
+
     let total: number = await baseQuery.getCount();
 
     let result = await baseQuery
-      .select([
-        'submission.postId as "postId"',
-        'submission.id as "submissionId"',
-        'submission.submittedFile as "submittedFile"',
-        'submission.submittedAt as "submittedAt"',
-        'submission.obtainedMarks as "submissionObtainedMarks"',
-        'submission.status as "submissionStatus"',
-        'assigned.id as "studentId"',
-        'assigned.fullName as "studentFullName"',
-        'post.id as "postId"',
-      ])
+      .select(queryArray)
       .limit(query.count)
       .offset((query.page - 1) * query.count)
       .orderBy('submission.createdAt', 'DESC')
@@ -121,6 +137,7 @@ export class SubmissionService {
     };
   }
 
+  // ================ ADMIN & TEACHER & STUDENT ================ //
   async listSubmissions(
     reqUser: ReqUserTokenPayloadDto,
     query: QueryListSubmissionDto,
@@ -130,6 +147,20 @@ export class SubmissionService {
       .leftJoinAndSelect('submission.assigned', 'assigned')
       .leftJoinAndSelect('submission.post', 'post')
       .leftJoinAndSelect('post.classRoom', 'classroom');
+
+    let queryArray: string[] = [
+      'submission.id as "submissionId"',
+      'submission.postId as "postId"',
+      'submission.submittedFile as "submittedFile"',
+      'submission.submittedAt as "submittedAt"',
+      'submission.status as "submissionStatus"',
+      'assigned.id as "studentId"',
+      'assigned.fullName as "studentFullName"',
+      'post.type as "postType"',
+      'post.resultPublished as "resultPublished"',
+      'post.id as "postId"',
+      'submission.createdAt as "assignedAt"',
+    ];
 
     if (reqUser.role === USERROLE_TYPE.TEACHER) {
       baseQuery.andWhere('classroom.teacherId = :teacherId', {
@@ -153,21 +184,17 @@ export class SubmissionService {
       });
     }
 
+    if (query.resultPublished) {
+      baseQuery.andWhere('post.resultPublished = :resultPublished', {
+        resultPublished: query.resultPublished,
+      });
+      queryArray.push('submission.obtainedMarks as "submissionObtainerMarks"');
+    }
+
     let total: number = await baseQuery.getCount();
 
     let result = await baseQuery
-      .select([
-        'submission.id as "submissionId"',
-        'submission.postId as "postId"',
-        'submission.submittedFile as "submittedFile"',
-        'submission.submittedAt as "submittedAt"',
-        'submission.obtainedMarks as "submissionObtainedMarks"',
-        'submission.status as "submissionStatus"',
-        'assigned.id as "studentId"',
-        'assigned.fullName as "studentFullName"',
-        'post.id as "postId"',
-        'submission.createdAt as "assignedAt"',
-      ])
+      .select(queryArray)
       .limit(query.count)
       .offset((query.page - 1) * query.count)
       .orderBy('submission.createdAt', 'DESC')
@@ -182,6 +209,42 @@ export class SubmissionService {
         total,
       },
       message: 'Successfully listed submission',
+    };
+  }
+
+  async createSubmission(
+    reqUser: ReqUserTokenPayloadDto,
+    body: CreateSubmissionDto,
+  ): Promise<ServiceResponseDto> {
+    let post: Post = await this.postRepository.findOne({
+      where: { id: body.postId },
+    });
+
+    if (!post) throw new BadRequestException("Post with that id doesn't exist");
+
+    let student: User = await this.userService.getUser({ id: body.assignedId });
+
+    if (!student) throw new BadRequestException('Assignee not found');
+
+    if (student.role !== USERROLE_TYPE.STUDENT)
+      throw new BadRequestException('Assignee is not a student');
+
+    let submissionFound: Submission = await this.submissionRepository.findOne({
+      where: { postId: body.postId, assignedId: body.assignedId },
+    });
+
+    if (submissionFound)
+      throw new BadRequestException(
+        `Assignee already has a submission ${submissionFound.status} in post`,
+      );
+
+    let newSubmission: Submission = await this.submissionRepository.save(
+      await this.submissionRepository.create(body),
+    );
+
+    return {
+      data: newSubmission,
+      message: 'Successfully created submission',
     };
   }
 
@@ -257,8 +320,7 @@ export class SubmissionService {
       );
     }
 
-    foundSubmission.obtainedMarks = body.obtainedMarks;
-    foundSubmission.status = SUBMISSION_STATUS_TYPE.EXAMINED;
+    Object.keys(body).map((item) => (foundSubmission[item] = body[item]));
 
     let data = await this.submissionRepository.save(foundSubmission);
 

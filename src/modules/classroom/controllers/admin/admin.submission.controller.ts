@@ -25,6 +25,7 @@ import { QueryListSubmissionDto } from '../../dtos/query-list-submission.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { submissionMulterConfig } from 'src/common/multer';
 import { UpdateSubmissionDto } from '../../dtos/update-submission.dto';
+import { CreateSubmissionDto } from '../../dtos/create-submission.dto';
 
 @UseGuards(AuthorizeGuard)
 @Permissions('submission', ['admin'])
@@ -33,7 +34,7 @@ export class AdminSubmissionController {
   constructor(private readonly submissionService: SubmissionService) {}
 
   @Get('')
-  async listSubmimissions(
+  async listSubmissions(
     @Query() query: QueryListSubmissionDto,
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
   ): Promise<ResponseDto> {
@@ -44,6 +45,21 @@ export class AdminSubmissionController {
       success: true,
       message,
       data,
+    };
+  }
+
+  @Post('')
+  async createSubmission(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Body() body: CreateSubmissionDto,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.submissionService.createSubmission(reqUser, body);
+    return {
+      code: 200,
+      success: true,
+      message: null,
+      data: null,
     };
   }
 

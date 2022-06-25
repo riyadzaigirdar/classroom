@@ -1,4 +1,12 @@
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+import { Transform } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { SUBMISSION_STATUS_TYPE } from 'src/common/enums';
 
 export class QuerySubmissionDto {
@@ -16,4 +24,8 @@ export class QuerySubmissionDto {
   @IsOptional()
   @IsNumber()
   count: number = 10;
+
+  @IsOptional()
+  @IsBoolean()
+  resultPublished: boolean;
 }
