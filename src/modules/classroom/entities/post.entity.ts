@@ -29,7 +29,7 @@ export class Post extends AbstractRepository {
   @ManyToOne((type) => ClassRoom, (classRoom) => classRoom.posts, {
     nullable: true,
     onDelete: 'CASCADE',
-    eager: true,
+    eager: false,
   })
   @JoinColumn({ name: 'classRoomId' })
   classRoom: ClassRoom[];
@@ -37,7 +37,7 @@ export class Post extends AbstractRepository {
   @ManyToOne((type) => User, (user) => user.posts, {
     nullable: true,
     onDelete: 'CASCADE',
-    eager: true,
+    eager: false,
   })
   @JoinColumn({ name: 'createdById' })
   createdBy: User[];

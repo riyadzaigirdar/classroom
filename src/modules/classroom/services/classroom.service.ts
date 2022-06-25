@@ -20,7 +20,6 @@ import { UpdateClassRoomDto } from '../dtos/update-classroom.dto';
 @Injectable()
 export class ClassRoomService {
   constructor(
-    @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(ClassRoom)
     private classRoomRepository: Repository<ClassRoom>,
     @InjectRepository(EnrolledStudent)
