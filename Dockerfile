@@ -1,6 +1,7 @@
 FROM --platform=linux/amd64 node:16-alpine AS build
 WORKDIR /app
 COPY package*.json ./
+RUN npm config set timeout 6000000
 RUN npm install
 COPY . .
 RUN npm run build
