@@ -27,6 +27,8 @@ export class PostService {
       where: { id: body.classRoomId },
     });
 
+    // ========= Techer must be the teacher of that classroom =========== //
+
     if (
       reqUser.role === USERROLE_TYPE.TEACHER &&
       foundClassroom.teacherId !== reqUser.id
@@ -48,12 +50,11 @@ export class PostService {
 
         post = await entityManager.save(postCreated);
 
-        let pendinginSubmissions =
-          await this.submissionService.createPendingSubmissions(
-            entityManager,
-            foundClassroom.id,
-            post.id,
-          );
+        await this.submissionService.createPendingSubmissions(
+          entityManager,
+          foundClassroom.id,
+          post.id,
+        );
       });
     } catch (error) {
       throw new BadRequestException('Bad Request');
@@ -64,7 +65,4 @@ export class PostService {
       message: 'Successfully created post',
     };
   }
-
-  // ================== GENERATE INVITE CODE(UUID) ========================== //
-  private generateRandomInviteCode = () => uuidv4();
 }

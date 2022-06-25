@@ -1,22 +1,22 @@
+import { AuthorizeGuard } from 'src/common/guard';
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { PostService } from '../services/post.service';
 import { Permissions } from 'src/common/decorator/controller.decorator';
-import { ReqUser } from 'src/common/decorator/param.decortor';
+import { CreatePostDto } from '../dtos/create-post.dto';
 import {
   ReqUserTokenPayloadDto,
   ResponseDto,
   ServiceResponseDto,
 } from 'src/common/dto';
-import { AuthorizeGuard } from 'src/common/guard';
-import { CreatePostDto } from '../dtos/create-post.dto';
-import { PostService } from '../services/post.service';
+import { ReqUser } from 'src/common/decorator/param.decortor';
 
 @UseGuards(AuthorizeGuard)
-@Controller('post')
-export class PostController {
+@Permissions('classroom', ['admin'])
+@Controller('admin/classroom')
+export class AdminPostController {
   constructor(private readonly postService: PostService) {}
 
   @Post('')
-  @Permissions('classroom', ['teacher'])
   async createPost(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Body() body: CreatePostDto,
