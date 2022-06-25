@@ -21,7 +21,7 @@ import { QuerySubmissionDto } from '../dtos/query-submission.dto';
 import { SubmissionService } from '../services/submission.service';
 
 @UseGuards(AuthorizeGuard)
-@Permissions('classroom', ['admin'])
+@Permissions('post', ['admin'])
 @Controller('admin/post')
 export class AdminPostController {
   constructor(

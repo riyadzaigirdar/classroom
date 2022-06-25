@@ -1,22 +1,22 @@
+import { AuthorizeGuard } from 'src/common/guard';
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { Permissions } from 'src/common/decorator/controller.decorator';
-import { ReqUser } from 'src/common/decorator/param.decortor';
 import {
   ReqUserTokenPayloadDto,
   ResponseDto,
   ServiceResponseDto,
 } from 'src/common/dto';
-import { AuthorizeGuard } from 'src/common/guard';
-import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
+import { ReqUser } from 'src/common/decorator/param.decortor';
 import { SubmissionService } from '../services/submission.service';
+import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 
 @UseGuards(AuthorizeGuard)
-@Controller('submission')
-export class SubmissionController {
+@Permissions('submission', ['admin'])
+@Controller('admin/post')
+export class AdminSubmissionController {
   constructor(private readonly submissionService: SubmissionService) {}
 
   @Get('')
-  @Permissions('classroom', ['teacher', 'student'])
   async listSubmimissions(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Query() query: QueryListSubmissionDto,

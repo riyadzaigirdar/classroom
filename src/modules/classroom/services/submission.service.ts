@@ -10,6 +10,7 @@ import { EnrolledStudent } from '../entities/enrolled_students.entity';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { QuerySubmissionDto } from '../dtos/query-submission.dto';
 import { count } from 'console';
+import { QueryListSubmissionDto } from '../dtos/query-list-submission.dto';
 
 @Injectable()
 export class SubmissionService {
@@ -87,7 +88,7 @@ export class SubmissionService {
       });
     }
 
-    let total = await baseQuery.getCount();
+    let total: number = await baseQuery.getCount();
 
     let result = await baseQuery
       .select([
@@ -112,6 +113,66 @@ export class SubmissionService {
         result,
       },
       message: 'Successsfully listed submission of a post',
+    };
+  }
+
+  async listSubmissions(
+    reqUser: ReqUserTokenPayloadDto,
+    query: QueryListSubmissionDto,
+  ): Promise<ServiceResponseDto> {
+    let baseQuery = await this.submissionRepository
+      .createQueryBuilder('submission')
+      .leftJoinAndSelect('submission.assigned', 'assigned')
+      .leftJoinAndSelect('submission.post', 'post')
+      .leftJoinAndSelect('post.classroom', 'classroom');
+
+    if (reqUser.role === USERROLE_TYPE.TEACHER) {
+      baseQuery.andWhere('classroom.teacherId = :teacherId', {
+        teacherId: reqUser.id,
+      });
+    }
+
+    if (reqUser.role === USERROLE_TYPE.STUDENT) {
+      baseQuery.andWhere('submission.assignedId = :assignedId', {
+        assignedId: reqUser.id,
+      });
+    }
+
+    if (query.postId) {
+      baseQuery.andWhere('post.id = :postId', { postId: query.postId });
+    }
+
+    if (query.status) {
+      baseQuery.andWhere('submission.status = :status', {
+        status: query.status,
+      });
+    }
+
+    let total: number = await baseQuery.getCount();
+
+    let result = await baseQuery
+      .select([
+        'submission.postId as "postId"',
+        'submission.id as "submissionId"',
+        'submission.submittedFile as "submittedFile"',
+        'submission.submittedAt as "submittedAt"',
+        'submission.obtainedMarks as "submissionObtainedMarks"',
+        'submission.status as "submissionStatus"',
+        'assigned.id as "studentId"',
+        'assigned.fullName as "studentFullName"',
+        'post.id as "postId"',
+      ])
+      .limit(query.count)
+      .offset((query.page - 1) * query.count)
+      .orderBy('submission.createdAt', 'DESC')
+      .getRawMany();
+
+    return {
+      data: {
+        result,
+        total,
+      },
+      message: 'Successfully listed submission',
     };
   }
 }

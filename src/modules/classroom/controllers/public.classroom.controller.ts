@@ -11,7 +11,7 @@ import { EnrollStudentDto } from '../dtos/enroll-student.dto';
 import { ClassRoomService } from '../services/classroom.service';
 
 @UseGuards(AuthorizeGuard)
-@AllowAnonymous('user')
+@AllowAnonymous('classroom')
 @Controller('public/classroom')
 export class PublicClassRoomController {
   constructor(private readonly classRoomService: ClassRoomService) {}
