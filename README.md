@@ -9,3 +9,5 @@
 ### Only Admin is manually created in the db
 
 ### After Running, Manually Create Admin by login in the postgres container PORT => 5433
+
+### Postgres container credentials are given in docker-compose file
