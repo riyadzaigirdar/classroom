@@ -87,7 +87,6 @@ export class AdminSubmissionController {
   }
 
   @Put(':submissionId')
-  @Permissions('classroom', ['teacher'])
   async updateSubmittion(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Param('submissionId') submissionId: number,

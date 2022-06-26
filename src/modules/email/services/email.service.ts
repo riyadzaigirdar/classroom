@@ -21,4 +21,8 @@ export class EmailService {
       )}`,
     );
   }
+
+  sendPendingAssignmentOrExamReminder(email: string, type: string) {
+    Logger.verbose(`Pending ${type} sent to  Email: ${email}`);
+  }
 }

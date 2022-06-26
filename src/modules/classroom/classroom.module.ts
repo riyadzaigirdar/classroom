@@ -19,8 +19,8 @@ import { ResultController } from './controllers/result.controller';
 import { EnrolledStudentService } from './services/result.service';
 @Module({
   imports: [
-    UserModule,
     TypeOrmModule.forFeature([ClassRoom, Post, Submission, EnrolledStudent]),
+    UserModule,
   ],
   controllers: [
     AdminSubmissionController,
@@ -38,5 +38,6 @@ import { EnrolledStudentService } from './services/result.service';
     SubmissionService,
     EnrolledStudentService,
   ],
+  exports: [TypeOrmModule.forFeature([Submission])],
 })
 export class ClassroomModule {}
