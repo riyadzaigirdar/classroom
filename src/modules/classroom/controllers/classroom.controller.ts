@@ -80,14 +80,32 @@ export class ClassRoomController {
     };
   }
 
-  @Get('/:classRoomId/get-result')
-  @Permissions('classroom', ['student'])
-  async getResultOfClass(
+  @Get('/:classRoomId/post')
+  @Permissions('classroom', ['teacher'])
+  async getPostOfClass(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Param('classRoomId') classRoomId: number,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
-      await this.classRoomService.getResult(reqUser, classRoomId);
+      await this.classRoomService.getPost(reqUser, classRoomId);
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Get('/enrolled-classes')
+  @Permissions('classroom', ['student'])
+  async getEnrolledClassesByStudent(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('count', new DefaultValuePipe(10), ParseIntPipe) count: number = 10,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.enrolledClasses(reqUser, page, count);
 
     return {
       code: 200,

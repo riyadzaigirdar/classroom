@@ -1,6 +1,6 @@
 import { AuthorizeGuard } from 'src/common/guard';
-import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
-import { EnrolledStudentService } from '../services/result.service';
+import { Body, Controller, Param, Put, UseGuards } from '@nestjs/common';
+import { EnrolledStudentService } from '../../services/result.service';
 import {
   ReqUserTokenPayloadDto,
   ResponseDto,
@@ -8,15 +8,15 @@ import {
 } from 'src/common/dto';
 import { Permissions } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
-import { UpdateResultDto } from '../dtos/update-enrolled-student.dto';
+import { UpdateResultDto } from '../../dtos/update-enrolled-student.dto';
 
 @UseGuards(AuthorizeGuard)
-@Controller('result')
+@Controller('admin/result')
+@Permissions('result', ['admin'])
 export class ResultController {
   constructor(private readonly enrollStudentService: EnrolledStudentService) {}
 
   @Put(':enrollId')
-  @Permissions('result', ['teacher'])
   async updateResults(
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
     @Param('enrollId') enrollId: number,

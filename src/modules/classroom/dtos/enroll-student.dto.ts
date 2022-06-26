@@ -1,4 +1,4 @@
-import { IsDefined, IsString, Min } from 'class-validator';
+import { IsDefined, IsString, Length, Min } from 'class-validator';
 import { CreateTeacherDto } from '../../user/dtos/create-teacher.dto';
 
 export class EnrollStudentDto extends CreateTeacherDto {
@@ -8,6 +8,6 @@ export class EnrollStudentDto extends CreateTeacherDto {
 
   @IsDefined()
   @IsString()
-  @Min(6)
+  @Length(6)
   password: string;
 }

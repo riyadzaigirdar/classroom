@@ -7,7 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
 import { USERROLE_TYPE } from 'src/common/enums';
 import { IsNull, Not, Repository } from 'typeorm';
-import { UpdateEnrolledStudentDto } from '../dtos/update-enrolled-student.dto';
+import { UpdateResultDto } from '../dtos/update-enrolled-student.dto';
+import { ClassRoom } from '../entities/classroom.entity';
 import { EnrolledStudent } from '../entities/enrolled-students.entity';
 
 @Injectable()
@@ -15,15 +16,28 @@ export class EnrolledStudentService {
   constructor(
     @InjectRepository(EnrolledStudent)
     private enrolledStudentRepository: Repository<EnrolledStudent>,
+    @InjectRepository(ClassRoom)
+    private classRoomRepository: Repository<ClassRoom>,
   ) {}
 
-  async updateEnrolledStudent(
+  async updateResult(
+    reqUser: ReqUserTokenPayloadDto,
     enrollId: number,
-    body: UpdateEnrolledStudentDto,
+    body: UpdateResultDto,
   ): Promise<ServiceResponseDto> {
     let foundEnroll = await this.enrolledStudentRepository.findOne({
       where: { id: enrollId },
     });
+
+    if (
+      reqUser.role !== USERROLE_TYPE.ADMIN &&
+      !(await this.classRoomRepository.findOne({
+        where: { id: foundEnroll.classRoomId, teacherId: reqUser.id },
+      }))
+    )
+      throw new BadRequestException(
+        'Teacher not permitted to access this information',
+      );
 
     if (!foundEnroll)
       throw new NotFoundException('Enrollment with that id not found');
@@ -37,28 +51,6 @@ export class EnrolledStudentService {
     return {
       message: 'Successfully updated curated result of enrolled student',
       data: saved,
-    };
-  }
-
-  async getResults(
-    reqUser: ReqUserTokenPayloadDto,
-  ): Promise<ServiceResponseDto> {
-    let filter = {
-      curatedResult: Not(IsNull()),
-    };
-
-    if (reqUser.role == USERROLE_TYPE.STUDENT) {
-      filter['studentId'] = reqUser.id;
-    }
-
-    let enrolledClassesResult: EnrolledStudent[] =
-      await this.enrolledStudentRepository.find({
-        where: filter,
-      });
-
-    return {
-      data: enrolledClassesResult,
-      message: 'Successfully get results',
     };
   }
 }

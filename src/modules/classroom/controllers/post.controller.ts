@@ -47,13 +47,13 @@ export class PostController {
     };
   }
 
-  @HttpCode(200)
   @Put(':postId')
   @Permissions('post', ['teacher'])
+  @HttpCode(200)
   async updatePost(
     @Param('postId') postId: number,
     @ReqUser() reqUser: ReqUserTokenPayloadDto,
-    @Body() body: UpdatePostDto,
+    @Body() body: Partial<UpdatePostDto>,
   ): Promise<ResponseDto> {
     let { data, message }: ServiceResponseDto =
       await this.postService.updatePost(reqUser, postId, body);

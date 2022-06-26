@@ -282,7 +282,7 @@ export class SubmissionService {
 
     return {
       data: savedSubmission,
-      message: 'Successfully added image',
+      message: 'Successfully added file to submission',
     };
   }
 
@@ -304,14 +304,12 @@ export class SubmissionService {
 
     if (
       reqUser.role !== USERROLE_TYPE.ADMIN &&
-      (
-        await this.classRoomRepository.findOne({
-          where: {
-            teacherId: reqUser.id,
-            id: post.classRoomId,
-          },
-        })
-      ).id
+      !(await this.classRoomRepository.findOne({
+        where: {
+          teacherId: reqUser.id,
+          id: post.classRoomId,
+        },
+      }))
     )
       throw new ForbiddenException('Teacher not permitted to update this info');
 

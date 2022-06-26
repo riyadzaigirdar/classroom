@@ -21,6 +21,7 @@ import { EnrolledStudent } from 'src/modules/classroom/entities/enrolled-student
 import { EnrollStudentDto } from 'src/modules/classroom/dtos/enroll-student.dto';
 import { StudentMeta } from '../entities/student_meta';
 import { ListUserQueryDto } from '../dtos/list-user-query.dto';
+import { ChangePassword } from '../dtos/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -223,6 +224,42 @@ export class UserService {
   async getUser(body: Partial<User>) {
     return await this.userRepository.findOne(body);
   }
+
+  async changePassword(
+    reqUser: ReqUserTokenPayloadDto,
+    body: ChangePassword,
+  ): Promise<ServiceResponseDto> {
+    let foundUser = await this.userRepository.findOne({
+      where: { id: reqUser.id },
+    });
+
+    if (!foundUser) throw new NotFoundException('User not found');
+
+    if (body.newPassword !== body.retypeNewPassword)
+      throw new BadRequestException("New Password didn't match");
+
+    if (
+      !(await this.checkPasswordMatch(foundUser.password, body.currentPassword))
+    )
+      throw new BadRequestException("Current password doesn't match");
+
+    if (await this.checkPasswordMatch(foundUser.password, body.newPassword))
+      throw new BadRequestException('Must change password to a new one');
+
+    foundUser.password = await this.hashPassword(body.newPassword);
+
+    let savedUser = await this.userRepository.save(foundUser);
+
+    return {
+      data: {
+        id: savedUser.id,
+        email: savedUser.email,
+        fullName: savedUser.fullName,
+      },
+      message: 'Successfully changed password',
+    };
+  }
+
   private async hashPassword(password): Promise<string> {
     const hash: string = await bcrypt.hash(password, 10);
     return hash;

@@ -22,6 +22,8 @@ export class ClassRoomService {
   constructor(
     @InjectRepository(ClassRoom)
     private classRoomRepository: Repository<ClassRoom>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
     @InjectRepository(EnrolledStudent)
     private enrolledStudentRepository: Repository<EnrolledStudent>,
     private readonly userService: UserService,
@@ -84,11 +86,6 @@ export class ClassRoomService {
   ): Promise<ServiceResponseDto> {
     let baseQuery = this.classRoomRepository
       .createQueryBuilder('classroom')
-      .loadRelationCountAndMap(
-        'classroom.enrolledStudents',
-        'classroom.enrolled_students',
-        'enrolled',
-      )
       .leftJoinAndSelect('classroom.createdBy', 'createdBy')
       .leftJoinAndSelect('classroom.teacher', 'teacher');
 
@@ -107,7 +104,9 @@ export class ClassRoomService {
         'classroom.inviteCode as "inviteCode"',
         'classroom.status as "classStatus"',
         'teacher.fullName as "teacher"',
+        'teacher.id as "teacherId"',
         'createdBy.fullName as "createdBy"',
+        'createdBy.id as "createdById"',
       ])
       .limit(count)
       .offset((page - 1) * count)
@@ -181,6 +180,33 @@ export class ClassRoomService {
     };
   }
 
+  async enrolledClasses(
+    reqUser: ReqUserTokenPayloadDto,
+    page: number,
+    count: number,
+  ): Promise<ServiceResponseDto> {
+    let baseQuery = this.enrolledStudentRepository
+      .createQueryBuilder('enrolled')
+      .leftJoinAndSelect('enrolled.classRoom', 'classroom')
+      .where('enrolled.studentId = :studentId', { studentId: reqUser.id });
+
+    let result = await baseQuery
+      .select([
+        'enrolled.classRoomId as "classRoomId"',
+        'classroom.className as "className"',
+        'classroom.subjectName as "classSubjectName"',
+        'classroom.status as "classStatus"',
+        'enrolled.curatedResult as "curatedResult"',
+      ])
+      .limit(count)
+      .offset((page - 1) * count)
+      .getRawMany();
+
+    return {
+      data: result,
+      message: 'Successfully get list of enrolled classes',
+    };
+  }
   async updateClassRoom(
     reqUser: ReqUserTokenPayloadDto,
     classRoomId: number,
@@ -210,7 +236,7 @@ export class ClassRoomService {
     if (
       body.status === CLASSROOM_STATUS_TYPE.ENDED &&
       (await this.enrolledStudentRepository.findOne({
-        where: { curatedResult: null },
+        where: { curatedResult: null, classRoomId },
       }))
     )
       throw new ForbiddenException('Some students missing curated result');
@@ -234,7 +260,7 @@ export class ClassRoomService {
     };
   }
 
-  async getResult(
+  async getPost(
     reqUser: ReqUserTokenPayloadDto,
     classRoomId: number,
   ): Promise<ServiceResponseDto> {
@@ -245,19 +271,22 @@ export class ClassRoomService {
     if (!classRoom)
       throw new NotFoundException('Classroom with that id not found');
 
-    if (classRoom.status != CLASSROOM_STATUS_TYPE.ENDED)
-      throw new ForbiddenException('Class has not ended');
+    if (
+      reqUser.role !== USERROLE_TYPE.ADMIN &&
+      classRoom.teacherId !== reqUser.id
+    )
+      throw new ForbiddenException(
+        'Teacher not permitted to access this information',
+      );
 
-    let enrolled = await this.enrolledStudentRepository.findOne({
-      where: { classRoomId, studentId: reqUser.id },
+    let posts = await this.postRepository.find({
+      where: { classRoomId: classRoomId },
+      loadEagerRelations: true,
     });
 
-    if (!enrolled)
-      throw new ForbiddenException('You are not enrolled to the class');
-
     return {
-      message: 'Successfully get result',
-      data: enrolled,
+      message: 'Successfully get posts of a class',
+      data: posts,
     };
   }
 
@@ -300,6 +329,7 @@ export class ClassRoomService {
         'student.id as "studentUserId"',
         'student.fullName "studentFullName"',
         'student.email "studentEmail"',
+        'enrolled.id as "enrolledId"',
       ])
       .limit(count)
       .offset((page - 1) * count)

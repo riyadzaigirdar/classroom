@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { Permissions } from 'src/common/decorator/controller.decorator';
 import { ReqUser } from 'src/common/decorator/param.decortor';
-import { ReqUserTokenPayloadDto, ServiceResponseDto } from 'src/common/dto';
+import {
+  ReqUserTokenPayloadDto,
+  ResponseDto,
+  ServiceResponseDto,
+} from 'src/common/dto';
 
 import { AuthorizeGuard } from '../../../../common/guard';
 import { CreateClassRoomDto } from '../../dtos/create-classroom.dto';
@@ -66,6 +70,22 @@ export class AdminClassRoomController {
   ) {
     let { data, message }: ServiceResponseDto =
       await this.classRoomService.updateClassRoom(reqUser, classRoomId, body);
+
+    return {
+      code: 200,
+      success: true,
+      message,
+      data,
+    };
+  }
+
+  @Get('/:classRoomId/post')
+  async getPostOfClass(
+    @ReqUser() reqUser: ReqUserTokenPayloadDto,
+    @Param('classRoomId') classRoomId: number,
+  ): Promise<ResponseDto> {
+    let { data, message }: ServiceResponseDto =
+      await this.classRoomService.getPost(reqUser, classRoomId);
 
     return {
       code: 200,

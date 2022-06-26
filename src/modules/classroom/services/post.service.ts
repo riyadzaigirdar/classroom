@@ -65,6 +65,7 @@ export class PostService {
         );
       });
     } catch (error) {
+      console.log(error);
       throw new BadRequestException('Bad Request');
     }
 
@@ -77,9 +78,19 @@ export class PostService {
   async updatePost(
     reqUser: ReqUserTokenPayloadDto,
     id: number,
-    body: UpdatePostDto,
+    body: Partial<UpdatePostDto>,
   ): Promise<ServiceResponseDto> {
     let post: Post = await this.postRepository.findOne({ where: { id } });
+
+    if (
+      reqUser.role !== USERROLE_TYPE.ADMIN &&
+      !(await this.classRoomRepository.findOne({
+        where: { id: post.classRoomId, teacherId: reqUser.id },
+      }))
+    )
+      throw new ForbiddenException(
+        'Teacher not permitted to update this information',
+      );
 
     if (!post) throw new NotFoundException('Post with that id not found');
 
@@ -101,13 +112,15 @@ export class PostService {
     let postSaved: Post;
 
     if (body.resultPublished) {
-      (savedSubmissions = await this.submissionRepository.find({
-        where: [
-          { status: SUBMISSION_STATUS_TYPE.EXPIRED },
-          { status: SUBMISSION_STATUS_TYPE.PENDING },
-          { obtainedMarks: null },
-        ],
-      })).map((item) => ({ ...item, obtainedMarks: 0 }));
+      savedSubmissions = (
+        await this.submissionRepository.find({
+          where: [
+            { status: SUBMISSION_STATUS_TYPE.EXPIRED },
+            { status: SUBMISSION_STATUS_TYPE.PENDING },
+            { obtainedMarks: null },
+          ],
+        })
+      ).map((item) => ({ ...item, obtainedMarks: 0 }));
     }
 
     Object.keys(body).map((item) => (post[item] = body[item]));

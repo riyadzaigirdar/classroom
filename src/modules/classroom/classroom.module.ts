@@ -16,7 +16,7 @@ import { PublicClassRoomController } from './controllers/public/public.classroom
 import { AdminPostController } from './controllers/admin/admin.post.controller';
 import { AdminSubmissionController } from './controllers/admin/admin.submission.controller';
 import { ResultController } from './controllers/result.controller';
-import { EnrolledStudentService } from './services/enrolled-student.service';
+import { EnrolledStudentService } from './services/result.service';
 @Module({
   imports: [
     UserModule,

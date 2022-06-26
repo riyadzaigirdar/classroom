@@ -47,8 +47,8 @@ export class AdminPostController {
     };
   }
 
-  @HttpCode(200)
   @Put(':postId')
+  @HttpCode(200)
   async updatePost(
     @Param('postId') postId: number,
     @ReqUser() reqUser: ReqUserTokenPayloadDto,

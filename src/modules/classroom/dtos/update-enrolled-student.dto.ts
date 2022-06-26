@@ -1,6 +1,6 @@
 import { IsDefined, IsNumber, Max, Min } from 'class-validator';
 
-export class UpdateEnrolledStudentDto {
+export class UpdateResultDto {
   @IsDefined()
   @IsNumber()
   @Min(0)
