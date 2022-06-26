@@ -1,0 +1,602 @@
+{
+	"info": {
+		"_postman_id": "eda1497f-67e7-45fc-91f4-af0a5a831ca5",
+		"name": "Classroom",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11725441"
+	},
+	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "List ClassRooms By Admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ADMIN_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/admin/classroom/?page=1&count=10",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"classroom",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "count",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_HOST}}/api/v1/admin/classroom/",
+									"host": [
+										"{{API_HOST}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"admin",
+										"classroom",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "493"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1ed-fBzEXhQExr61f72rzbJQthggGH4\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 24 Jun 2022 11:51:22 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"success\": true,\n    \"message\": \"Successfully listed classroom\",\n    \"data\": {\n        \"total\": 2,\n        \"result\": [\n            {\n                \"classroomId\": 1,\n                \"className\": \"CLASS name 1\",\n                \"subjectName\": \"subject name 1\",\n                \"inviteCode\": \"01G6AQ7ZE1NYYHZHH5ND9ACSG6\",\n                \"status\": \"ongoing\",\n                \"teacher\": \"teacher fullName\",\n                \"createdby\": \"teacher fullName\"\n            },\n            {\n                \"classroomId\": 2,\n                \"className\": \"CLASS name 2\",\n                \"subjectName\": \"subject name 1\",\n                \"inviteCode\": \"01G6AQ99SCBXDVPVSX8P11K9NR\",\n                \"status\": \"ongoing\",\n                \"teacher\": \"teacher fullName\",\n                \"createdby\": \"teacher fullName\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "List Enrolled Students Of ClassRoom By Teacher",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ADMIN_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/admin/classroom/7/enrolled-students",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"classroom",
+								"7",
+								"enrolled-students"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Classroom By Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ADMIN_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"className\": \"Chemistry class\",\n    \"subjectName\": \"Chemistry 101\",\n    \"teacherId\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/admin/classroom/",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"classroom",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Classroom By Admin",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ADMIN_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"ended\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/admin/classroom/7",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"classroom",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List post of a classroom",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ADMIN_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/admin/classroom/7/post",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"classroom",
+								"7",
+								"post"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Teacher",
+			"item": [
+				{
+					"name": "Create Classroom By Teacher",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TEACHER_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"className\": \"Physics class 1\",\n    \"subjectName\": \"PHYSICS 101\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TEACHER_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"className\": \"Physics class 1\",\n    \"subjectName\": \"PHYSICS 101\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{API_HOST}}/api/v1/classroom/",
+									"host": [
+										"{{API_HOST}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"classroom",
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "205"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"cd-WQiQa0m2YwWml+tI3xIuPh57AjY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 24 Jun 2022 11:52:53 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 201,\n    \"success\": true,\n    \"message\": \"Successfully created classroom\",\n    \"data\": {\n        \"id\": 3,\n        \"className\": \"Physics class 1\",\n        \"subjectName\": \"PHYSICS 101\",\n        \"status\": \"ongoing\",\n        \"inviteCode\": \"01G6ARTSHQV5RKTKRDB1P9CVD8\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "List ClassRooms By Teacher",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TEACHER3_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{TEACHER_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_HOST}}/api/v1/classroom/",
+									"host": [
+										"{{API_HOST}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"classroom",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "493"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1ed-R3YN+g+gNBnn2Pk8EnGKl0gdiuY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 24 Jun 2022 11:48:28 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"success\": true,\n    \"message\": \"Successfully listed classroom\",\n    \"data\": {\n        \"total\": 2,\n        \"result\": [\n            {\n                \"classroomId\": 2,\n                \"className\": \"CLASS name 2\",\n                \"subjectName\": \"subject name 1\",\n                \"inviteCode\": \"01G6AQ99SCBXDVPVSX8P11K9NR\",\n                \"status\": \"ongoing\",\n                \"teacher\": \"teacher fullName\",\n                \"createdby\": \"teacher fullName\"\n            },\n            {\n                \"classroomId\": 1,\n                \"className\": \"CLASS name 1\",\n                \"subjectName\": \"subject name 1\",\n                \"inviteCode\": \"01G6AQ7ZE1NYYHZHH5ND9ACSG6\",\n                \"status\": \"ongoing\",\n                \"teacher\": \"teacher fullName\",\n                \"createdby\": \"teacher fullName\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "List Enrolled Students Of ClassRoom By Teacher",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TEACHER3_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/7/enrolled-students",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								"7",
+								"enrolled-students"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Classroom By Teacher",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TEACHER_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subjectName\": \"Physics class 1 updated\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/3",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List posts of a class by teacher",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TEACHER3_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/7/post",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								"7",
+								"post"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student",
+			"item": [
+				{
+					"name": "Enroll To ClassRoom By Student",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"studentId\": \"311223\",\n    \"password\": \"123456\",\n    \"fullName\": \"student fullName\",\n    \"email\": \"riyad@asd.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/public/classroom/01G6G6Z5NKZS40KQP1B8Z2A5TQ/enroll",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"public",
+								"classroom",
+								"01G6G6Z5NKZS40KQP1B8Z2A5TQ",
+								"enroll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Enrolled Classess By Student",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{STUDENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_HOST}}/api/v1/classroom/enrolled-classes",
+							"host": [
+								"{{API_HOST}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"classroom",
+								"enrolled-classes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
