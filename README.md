@@ -1,3 +1,12 @@
+## API_HOST
+    
+    https://startiv-classroom.herokuapp.com
+
+## ADMIN CREDENTIALS
+    
+    email => riyad@fake.com
+    password= > 123456
+
 ### To Run Application Simply Run
 
     docker-compose up
