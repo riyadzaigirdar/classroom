@@ -2,7 +2,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
 import { AppModule } from './app.module';
-console.log('ok gone 3')
+console.log('ok gone 4')
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
